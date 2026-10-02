@@ -32,6 +32,7 @@ import { SecurityPage } from './pages/SecurityPage';
 import { StatusPage } from './pages/StatusPage';
 import { AboutPage, ContactPage, PrivacyPage, TermsPage, RefundPage } from './pages/CompanyPages';
 import { AuthPage } from './pages/AuthPages';
+import { BlogPage, BLOG_ARTICLES } from './pages/BlogPage';
 
 // Dashboard Pages
 import { DashboardOverviewPage } from './pages/dashboard/DashboardOverviewPage';
@@ -79,6 +80,26 @@ function MainApp() {
   const [aiAnalysisModalOpen, setAiAnalysisModalOpen] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any | null>(null);
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
+
+  useEffect(() => {
+    const articleSlug = route.startsWith('/blog/') ? route.slice('/blog/'.length) : '';
+    const article = BLOG_ARTICLES.find((item) => item.slug === articleSlug);
+    const metadata: Record<string, { title: string; description: string }> = {
+      '/': { title: 'SameWindow — AI Agent Flight Recorder', description: 'Record, replay, and debug AI agent executions. Inspect tool calls, latency, errors, token usage, and the first meaningful divergence.' },
+      '/pricing': { title: 'Pricing — SameWindow', description: 'Simple plans for AI agent debugging, execution tracing, replay, and production analysis.' },
+      '/docs': { title: 'Documentation — SameWindow', description: 'Developer documentation for recording AI agent runs, tool calls, traces, replay, and analysis.' },
+      '/security': { title: 'Security — SameWindow', description: 'Security, redaction, telemetry controls, and data handling for SameWindow AI agent traces.' },
+      '/blog': { title: 'AI Agent Debugging Blog — SameWindow', description: 'Practical guides to AI agent debugging, observability, tracing, run replay, tool calls, and production failures.' },
+    };
+    const meta = article ? { title: article.title + ' — SameWindow', description: article.description } : (metadata[route] || metadata['/']);
+    document.title = meta.title;
+    let description = document.querySelector('meta[name="description"]');
+    if (!description) { description = document.createElement('meta'); description.setAttribute('name', 'description'); document.head.appendChild(description); }
+    description.setAttribute('content', meta.description);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical'); document.head.appendChild(canonical); }
+    canonical.setAttribute('href', 'https://samewindow.com' + (route === '/' ? '/' : route));
+  }, [route]);
 
   // Sync route with browser history
   useEffect(() => {
@@ -272,6 +293,8 @@ function MainApp() {
           {route === '/privacy' && <PrivacyPage />}
           {route === '/terms' && <TermsPage />}
           {route === '/refund' && <RefundPage />}
+          {route === '/blog' && <BlogPage onNavigate={navigate} />}
+          {route.startsWith('/blog/') && <BlogPage slug={route.slice('/blog/'.length)} onNavigate={navigate} />}
         </main>
 
         <Footer onNavigate={navigate} />
