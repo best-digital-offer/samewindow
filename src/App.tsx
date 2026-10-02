@@ -9,7 +9,6 @@ import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { TopNav } from './components/dashboard/TopNav';
-import { Storage } from './lib/storage';
 import { ensureDefaultProject, loadRuns } from './lib/db';
 import { supabase } from './lib/supabase';
 import { AIService } from './services/aiService';
@@ -530,7 +529,7 @@ function MainApp() {
               activeProjectId={activeProjectId}
               onSelectProject={(id) => {
                 setActiveProjectId(id);
-                Storage.setActiveProjectId(id);
+                if (user?.email) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
               }}
               onNavigate={navigate}
             />
@@ -542,7 +541,7 @@ function MainApp() {
             <ProjectSettingsPage
               project={activeProject}
               onProjectUpdated={(updated) => {
-                setProjects(Storage.getProjects());
+                setProjects((current) => current.map((p) => p.id === updated.id ? updated : p));
               }}
             />
           ) : route === '/billing' ? (
