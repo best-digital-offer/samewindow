@@ -169,7 +169,8 @@ function MainApp() {
 
   // Re-fetch runs whenever active project or showDemoRuns changes
   useEffect(() => {
-    loadRuns(activeProjectId).then(setRuns);
+    if (!activeProjectId || showDemoRuns) return;
+    loadRuns(activeProjectId).then(setRuns).catch(() => toast('Could not refresh runs.', 'error'));
   }, [activeProjectId, showDemoRuns]);
 
   const activeProject =
@@ -387,7 +388,7 @@ function MainApp() {
         activeProjectId={activeProjectId}
         onSelectProject={(id) => {
           setActiveProjectId(id);
-          Storage.setActiveProjectId(id);
+          localStorage.setItem('samewindow_active_project_id', id);
         }}
         onCreateProjectClick={() => navigate('/projects')}
         userEmail={user?.email || 'developer@samewindow.io'}
