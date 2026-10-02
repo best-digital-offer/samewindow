@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Project } from '../../types';
-import { Storage } from '../../lib/storage';
+import { updateProject } from '../../lib/db';
 import { useToast } from '../../components/common/Toast';
 import { Shield, EyeOff, Save, Trash2 } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export const ProjectSettingsPage: React.FC<ProjectSettingsPageProps> = ({
     setRedactionKeys(redactionKeys.filter((x) => x !== k));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated: Project = {
       ...project,
@@ -44,9 +44,13 @@ export const ProjectSettingsPage: React.FC<ProjectSettingsPageProps> = ({
       retentionDays: Number(retentionDays),
       redactionKeys,
     };
-    Storage.updateProject(updated);
-    onProjectUpdated(updated);
-    toast('Project settings saved successfully.', 'success');
+    try {
+      const saved = await updateProject(updated);
+      onProjectUpdated(saved);
+      toast('Project settings saved successfully.', 'success');
+    } catch (error: any) {
+      toast(error?.message || 'Unable to save project settings.', 'error');
+    }
   };
 
   return (
