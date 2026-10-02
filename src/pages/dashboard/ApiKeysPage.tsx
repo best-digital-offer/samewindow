@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { KeyRound, Plus, Trash2, Copy, Check, ShieldCheck, AlertCircle } from 'lucide-react';
 import { ApiKey, Project } from '../../types';
-import { Storage } from '../../lib/storage';
+import { loadApiKeys } from '../../lib/db';
+import { supabase } from '../../lib/supabase';
 import { useToast } from '../../components/common/Toast';
 import { Modal } from '../../components/common/Modal';
 
@@ -11,18 +12,26 @@ interface ApiKeysPageProps {
 
 export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
   const { toast } = useToast();
-  const [keys, setKeys] = useState<ApiKey[]>(() => Storage.getApiKeys(activeProject.id));
+  const [keys, setKeys] = useState<ApiKey[]>([]);
+
+  React.useEffect(() => { loadApiKeys(activeProject.id).then(setKeys).catch(() => toast('Could not load API keys.', 'error')); }, [activeProject.id]);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [generatedSecret, setGeneratedSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim()) return;
 
-    const { key, rawSecret } = Storage.createApiKey(activeProject.id, newKeyName.trim());
-    setKeys(Storage.getApiKeys(activeProject.id));
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
+    const response = await fetch('/api/create-api-key', { method:'POST', headers:{'Content-Type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, body:JSON.stringify({projectId:activeProject.id,name:newKeyName.trim()}) });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || 'Unable to create API key.');
+    const { rawSecret } = payload;
+    const key = payload.key as ApiKey;
+    setKeys((current) => [key, ...current]);
     setGeneratedSecret(rawSecret);
     setNewKeyName('');
     toast('API Key generated successfully.', 'success');
@@ -31,7 +40,11 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
   const handleRevoke = (keyId: string) => {
     if (confirm('Are you sure you want to revoke this API key? Any agents using it will immediately fail ingestion.')) {
       Storage.revokeApiKey(keyId);
-      setKeys(Storage.getApiKeys(activeProject.id));
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const response = await fetch('/api/create-api-key', { method:'DELETE', headers:{'Content-Type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, body:JSON.stringify({keyId}) });
+      if (!response.ok) throw new Error('Unable to revoke API key.');
+      setKeys((current) => current.filter((k) => k.id !== keyId));
       toast('API Key revoked.', 'info');
     }
   };
