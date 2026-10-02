@@ -1,16 +1,14 @@
 import React from 'react';
-import { Terminal, KeyRound, BookOpen, Play } from 'lucide-react';
+import { Terminal, KeyRound, BookOpen } from 'lucide-react';
 
 interface EmptyStateProps {
   onQuickstartClick: () => void;
   onCreateKeyClick: () => void;
-  onSimulateClick?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   onQuickstartClick,
   onCreateKeyClick,
-  onSimulateClick,
 }) => {
   return (
     <div className="py-16 px-6 text-center rounded-xl border border-dashed border-[#20293a] bg-[#0c0f16]/60 flex flex-col items-center max-w-xl mx-auto my-8">
@@ -47,15 +45,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <KeyRound className="w-3.5 h-3.5" />
           <span>Create API Key</span>
         </button>
-        {onSimulateClick && (
-          <button
-            onClick={onSimulateClick}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-800/40 rounded-md transition-colors"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Simulate Test Trace</span>
-          </button>
-        )}
       </div>
     </div>
   );
