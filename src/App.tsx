@@ -368,7 +368,9 @@ function MainApp() {
         activeProjectId={activeProjectId}
         onSelectProject={(id) => {
           setActiveProjectId(id);
-          if (user?.email) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
+          supabase.auth.getUser().then(({ data }) => {
+            if (data.user) localStorage.setItem(`samewindow_active_project_id:${data.user.id}`, id);
+          });
         }}
         onCreateProjectClick={() => navigate('/projects')}
         userEmail={user?.email || 'developer@samewindow.io'}
