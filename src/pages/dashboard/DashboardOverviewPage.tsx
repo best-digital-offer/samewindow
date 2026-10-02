@@ -11,7 +11,6 @@ interface DashboardOverviewPageProps {
   onSelectRun: (runId: string) => void;
   onNavigate: (route: string) => void;
   onCreateKeyClick: () => void;
-  onSimulateRun: () => void;
 }
 
 export const DashboardOverviewPage: React.FC<DashboardOverviewPageProps> = ({
@@ -20,7 +19,6 @@ export const DashboardOverviewPage: React.FC<DashboardOverviewPageProps> = ({
   onSelectRun,
   onNavigate,
   onCreateKeyClick,
-  onSimulateRun,
 }) => {
   const totalRuns = runs.length;
   const successfulRuns = runs.filter((r) => r.status === 'SUCCESS').length;
@@ -90,7 +88,6 @@ export const DashboardOverviewPage: React.FC<DashboardOverviewPageProps> = ({
           <EmptyState
             onQuickstartClick={() => onNavigate('/docs/quickstart')}
             onCreateKeyClick={onCreateKeyClick}
-            onSimulateClick={onSimulateRun}
           />
         ) : (
           <RunsTable runs={runs} onSelectRun={onSelectRun} />
