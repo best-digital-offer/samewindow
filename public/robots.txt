@@ -4,4 +4,4 @@ Disallow: /api/
 Disallow: /dashboard/
 Disallow: /projects/
 
-Sitemap: https://samewindow.io/sitemap.xml
+Sitemap: https://samewindow.com/sitemap.xml
