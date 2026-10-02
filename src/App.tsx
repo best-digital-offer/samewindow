@@ -10,6 +10,7 @@ import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { TopNav } from './components/dashboard/TopNav';
 import { Storage } from './lib/storage';
+import { supabase } from './lib/supabase';
 import { AIService } from './services/aiService';
 import { simulateLiveAgentRun, SimulatorScenario } from './lib/simulator';
 import { Run, Project } from './types';
@@ -59,9 +60,8 @@ function MainApp() {
   });
 
   // User and project state
-  const [user, setUser] = useState<{ email: string; name: string } | null>(() =>
-    Storage.getUserSession()
-  );
+  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>(() => Storage.getProjects());
   const [activeProjectId, setActiveProjectId] = useState<string>(() =>
     Storage.getActiveProjectId()
@@ -100,6 +100,35 @@ function MainApp() {
     if (!canonical) { canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical'); document.head.appendChild(canonical); }
     canonical.setAttribute('href', 'https://samewindow.com' + (route === '/' ? '/' : route));
   }, [route]);
+
+  // Supabase authentication session
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      const sessionUser = data.session?.user;
+      setUser(sessionUser ? {
+        email: sessionUser.email || '',
+        name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || 'Developer',
+      } : null);
+      setAuthLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const sessionUser = session?.user;
+      setUser(sessionUser ? {
+        email: sessionUser.email || '',
+        name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || 'Developer',
+      } : null);
+      setAuthLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   // Sync route with browser history
   useEffect(() => {
@@ -161,8 +190,8 @@ function MainApp() {
     }
   };
 
-  const handleSignOut = () => {
-    Storage.setUserSession(null);
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     toast('Signed out.', 'info');
     navigate('/');
@@ -189,6 +218,10 @@ function MainApp() {
       navigate(`/projects/${activeProjectId}/runs`);
     }
   };
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-[#090b0e] text-[#ededef] flex items-center justify-center text-sm text-slate-400">Loading SameWindow...</div>;
+  }
 
   // ----------------------------------------------------
   // ROUTE PARSING & DISPATCHING
