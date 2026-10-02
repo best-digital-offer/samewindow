@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FolderDot, Plus, ArrowRight, Shield, Layers } from 'lucide-react';
 import { Project } from '../../types';
-import { Storage } from '../../lib/storage';
+import { createProject } from '../../lib/db';
 import { useToast } from '../../components/common/Toast';
 import { Modal } from '../../components/common/Modal';
 
@@ -24,11 +24,14 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   const [description, setDescription] = useState('');
   const [env, setEnv] = useState<'production' | 'staging' | 'development'>('production');
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newProj = Storage.createProject(name.trim(), description.trim(), env);
+    const session = await (await import('../../lib/supabase')).supabase.auth.getSession();
+    const userId = session.data.session?.user.id;
+    if (!userId) { toast('Please sign in again.', 'error'); return; }
+    const newProj = await createProject(userId, name.trim(), description.trim(), env);
     toast(`Project '${newProj.name}' initialized.`, 'success');
     setCreateModal(false);
     setName('');
