@@ -1,38 +1,48 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes, createHash } from 'node:crypto';
 
-function adminClient() {
+function supabaseServerClient(accessToken: string) {
   const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error('Supabase server environment is not configured.');
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
 }
 
-async function authenticatedUser(request: Request) {
+function getAccessToken(request: Request) {
   const auth = request.headers.get('authorization') || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  return auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+}
+
+async function authenticatedClient(request: Request) {
+  const token = getAccessToken(request);
   if (!token) return null;
-  const client = adminClient();
-  const { data } = await client.auth.getUser(token);
-  return data.user || null;
+  const client = supabaseServerClient(token);
+  const { data, error } = await client.auth.getUser(token);
+  if (error || !data.user) return null;
+  return { client, user: data.user };
 }
 
 export async function POST(request: Request) {
   try {
-    const user = await authenticatedUser(request);
-    if (!user) return Response.json({ error:'Unauthorized' }, { status:401 });
+    const auth = await authenticatedClient(request);
+    if (!auth) return Response.json({ error:'Unauthorized' }, { status:401 });
+    const { client, user } = auth;
     const { projectId, name } = await request.json();
     if (!projectId || !name?.trim()) return Response.json({ error:'projectId and name are required.' }, { status:400 });
 
-    const admin = adminClient();
-    const { data: project } = await admin.from('projects').select('id').eq('id', projectId).eq('owner_id', user.id).maybeSingle();
+    const { data: project, error: projectError } = await client
+      .from('projects').select('id').eq('id', projectId).eq('owner_id', user.id).maybeSingle();
+    if (projectError) throw projectError;
     if (!project) return Response.json({ error:'Project not found.' }, { status:404 });
 
     const secret = 'sw_live_' + randomBytes(20).toString('hex');
     const prefix = secret.slice(0, 13) + '...' + secret.slice(-4);
     const hash = createHash('sha256').update(secret).digest('hex');
 
-    const { data, error } = await admin.from('api_keys').insert({
+    const { data, error } = await client.from('api_keys').insert({
       project_id: projectId, name:name.trim(), key_prefix:prefix, key_hash:hash
     }).select('id,project_id,name,key_prefix,last_used_at,created_at').single();
     if (error) throw error;
@@ -48,15 +58,18 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const user = await authenticatedUser(request);
-    if (!user) return Response.json({ error:'Unauthorized' }, { status:401 });
+    const auth = await authenticatedClient(request);
+    if (!auth) return Response.json({ error:'Unauthorized' }, { status:401 });
+    const { client, user } = auth;
     const { keyId } = await request.json();
-    const admin = adminClient();
-    const { data:key } = await admin.from('api_keys').select('id,project_id').eq('id',keyId).maybeSingle();
+    const { data:key, error:keyError } = await client.from('api_keys').select('id,project_id').eq('id',keyId).maybeSingle();
+    if (keyError) throw keyError;
     if (!key) return Response.json({ error:'API key not found.' }, { status:404 });
-    const { data:project } = await admin.from('projects').select('id').eq('id',key.project_id).eq('owner_id',user.id).maybeSingle();
+    const { data:project, error:projectError } = await client.from('projects').select('id').eq('id',key.project_id).eq('owner_id',user.id).maybeSingle();
+    if (projectError) throw projectError;
     if (!project) return Response.json({ error:'Forbidden' }, { status:403 });
-    await admin.from('api_keys').update({ revoked_at:new Date().toISOString() }).eq('id',keyId);
+    const { error:updateError } = await client.from('api_keys').update({ revoked_at:new Date().toISOString() }).eq('id',keyId);
+    if (updateError) throw updateError;
     return Response.json({ success:true });
   } catch (error:any) {
     return Response.json({ error:error?.message || 'Unable to revoke API key.' }, { status:500 });
