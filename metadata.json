@@ -1,0 +1,6 @@
+{
+  "name": "SameWindow — AI Agent Flight Recorder",
+  "description": "Record, replay, and debug AI agent executions. Inspect tool calls, latency, errors, token usage, and detect the first divergence between runs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
