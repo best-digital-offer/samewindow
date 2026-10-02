@@ -12,7 +12,6 @@ import { TopNav } from './components/dashboard/TopNav';
 import { ensureDefaultProject, loadRuns } from './lib/db';
 import { supabase } from './lib/supabase';
 import { AIService } from './services/aiService';
-import { simulateLiveAgentRun, SimulatorScenario } from './lib/simulator';
 import { Run, Project } from './types';
 
 // Landing Page Components
@@ -64,12 +63,10 @@ function MainApp() {
   const [authLoading, setAuthLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string>('');
-  const [showDemoRuns, setShowDemoRuns] = useState(false);
   const [runs, setRuns] = useState<Run[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
 
   // Run detail and interactive state
-  const [isSimulating, setIsSimulating] = useState(false);
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayStep, setReplayStep] = useState(0);
 
@@ -183,17 +180,6 @@ function MainApp() {
   }, [activeProjectId]);
 
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0] || null;
-
-  const handleToggleDemoRuns = () => {
-    const nextVal = !showDemoRuns;
-    setShowDemoRuns(nextVal);
-    toast(
-      nextVal
-        ? 'Sample demo runs enabled.'
-        : 'Sample demo runs hidden (Showing real runs only).',
-      'info'
-    );
-  };
 
   const handleSimulateRun = async (scenario: SimulatorScenario = 'finance_401') => {
     setIsSimulating(true);
@@ -412,10 +398,6 @@ function MainApp() {
           breadcrumbs={breadcrumbs}
           onNavigate={navigate}
           activeProject={activeProject}
-          showDemoRuns={showDemoRuns}
-          onToggleDemoRuns={handleToggleDemoRuns}
-          onSimulateRun={handleSimulateRun}
-          isSimulating={isSimulating}
         />
 
         <main className="flex-1 pb-16">
