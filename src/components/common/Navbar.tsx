@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Terminal, ExternalLink } from 'lucide-react';
+import { Menu, X, Terminal } from 'lucide-react';
 
 interface NavbarProps {
   onNavigate: (route: string) => void;
@@ -58,6 +58,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = '/', 
             Pricing
           </button>
           <button
+            onClick={() => handleNav('/blog')}
+            className={`hover:text-slate-200 transition-colors ${currentRoute.startsWith('/blog') ? 'text-white' : ''}`}
+          >
+            Blog
+          </button>
+          <button
             onClick={() => handleNav('/docs')}
             className={`hover:text-slate-200 transition-colors ${currentRoute.startsWith('/docs') ? 'text-white' : ''}`}
           >
@@ -111,6 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentRoute = '/', 
             <button onClick={() => handleNav('/projects/proj_default/runs/run_1842_failed')} className="text-left py-1 hover:text-white">Flight Recorder Demo</button>
             <button onClick={() => handleNav('/projects/proj_default/compare')} className="text-left py-1 hover:text-white">Divergence Compare</button>
             <button onClick={() => handleNav('/pricing')} className="text-left py-1 hover:text-white">Pricing</button>
+            <button onClick={() => handleNav('/blog')} className="text-left py-1 hover:text-white">Blog</button>
             <button onClick={() => handleNav('/docs')} className="text-left py-1 hover:text-white">Docs</button>
             <button onClick={() => handleNav('/status')} className="text-left py-1 hover:text-white">System Status</button>
           </div>
