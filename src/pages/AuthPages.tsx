@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Terminal, Lock, Mail, ArrowRight, CheckCircle2, Shield } from 'lucide-react';
-import { Storage } from '../lib/storage';
+import { Terminal, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { useToast } from '../components/common/Toast';
 
 interface AuthPageProps {
@@ -17,39 +17,65 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
   const [loading, setLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
       if (mode === 'forgot-password') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/signin',
+        });
+        if (error) throw error;
         setForgotSent(true);
-        toast(`Password reset link dispatched to ${email}`, 'success');
+        toast('Password reset email sent.', 'success');
         return;
       }
 
-      const user = {
-        email: email || 'developer@samewindow.io',
-        name: name || email.split('@')[0] || 'Developer',
-      };
-      Storage.setUserSession(user);
-      toast(mode === 'signup' ? 'Welcome to SameWindow! Flight recorder initialized.' : 'Signed in successfully.', 'success');
-      onSuccess(user);
-    }, 400);
-  };
+      if (mode === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+          },
+        });
+        if (error) throw error;
 
-  const handleDemoSignIn = () => {
-    const devUser = { email: 'developer@samewindow.io', name: 'Dev Operator' };
-    Storage.setUserSession(devUser);
-    toast('Authenticated as Dev Operator.', 'success');
-    onSuccess(devUser);
+        if (!data.session) {
+          toast('Account created. Check your email to confirm your address.', 'success');
+          onNavigate('/signin');
+          return;
+        }
+
+        const user = data.user;
+        onSuccess({
+          email: user?.email || email,
+          name: name || user?.email?.split('@')[0] || 'Developer',
+        });
+        toast('Account created successfully.', 'success');
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      const user = data.user;
+      onSuccess({
+        email: user?.email || email,
+        name: (user?.user_metadata?.full_name as string) || user?.email?.split('@')[0] || 'Developer',
+      });
+      toast('Signed in successfully.', 'success');
+    } catch (error: any) {
+      toast(error?.message || 'Authentication failed.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
-        {/* Header */}
         <div className="text-center space-y-2">
           <button
             onClick={() => onNavigate('/')}
@@ -72,14 +98,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
           </p>
         </div>
 
-        {/* Card */}
         <div className="p-6 rounded-2xl bg-[#0c0f16] border border-[#1b2230] shadow-2xl space-y-4">
           {forgotSent ? (
             <div className="text-center space-y-3 py-4">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
               <h4 className="text-xs font-semibold text-white">Reset Email Sent</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Check <span className="text-slate-200">{email}</span> for the recovery link to configure a new password.
+                Check <span className="text-slate-200">{email}</span> for the recovery link.
               </p>
               <button
                 onClick={() => onNavigate('/signin')}
@@ -133,7 +158,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                   <input
                     type="password"
                     required
-                    placeholder="••••••••••••"
+                    minLength={8}
+                    placeholder="At least 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full p-2.5 rounded-lg bg-[#10141d] border border-[#212836] text-white focus:outline-none focus:border-indigo-500/50"
@@ -144,7 +170,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center justify-center gap-1.5 shadow-sm mt-2"
+                className="w-full py-2.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5 shadow-sm mt-2"
               >
                 <span>
                   {loading
@@ -160,39 +186,18 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
             </form>
           )}
 
-          {/* Instant Developer Demo Sign-in */}
-          {mode !== 'forgot-password' && (
-            <div className="pt-2 border-t border-[#171d28] space-y-2">
-              <button
-                onClick={handleDemoSignIn}
-                type="button"
-                className="w-full py-2 rounded-lg text-xs font-medium text-slate-300 bg-[#121622] hover:bg-[#18202e] border border-[#222b3b] hover:text-white transition-colors flex items-center justify-center gap-2"
-              >
-                <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Instant 1-Click Sandbox Sign-In</span>
-              </button>
-            </div>
-          )}
-
-          {/* Footer switcher */}
-          <div className="text-center text-xs text-slate-400 pt-1">
+          <div className="text-center text-xs text-slate-400 pt-2 border-t border-[#171d28]">
             {mode === 'signin' ? (
               <span>
                 Don't have an account?{' '}
-                <button
-                  onClick={() => onNavigate('/signup')}
-                  className="text-indigo-400 hover:underline font-medium"
-                >
+                <button onClick={() => onNavigate('/signup')} className="text-indigo-400 hover:underline font-medium">
                   Start free
                 </button>
               </span>
             ) : (
               <span>
                 Already have an account?{' '}
-                <button
-                  onClick={() => onNavigate('/signin')}
-                  className="text-indigo-400 hover:underline font-medium"
-                >
+                <button onClick={() => onNavigate('/signin')} className="text-indigo-400 hover:underline font-medium">
                   Sign in
                 </button>
               </span>
