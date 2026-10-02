@@ -74,7 +74,11 @@ export async function POST(request: Request) {
           input:json(e.data?.userInput ? {userInput:e.data.userInput} : e.data?.toolCall?.arguments),
           output:json(e.data?.finalResponse ?? e.data?.toolCall?.response ?? e.data?.modelCall?.responsePreview),
           error:json(e.data?.error || null),
-          metadata:{offsetMs:Number(e.offsetMs || 0), statusCode:e.statusCode ?? null},
+          metadata:{
+            offsetMs:Number(e.offsetMs || 0),
+            statusCode:e.statusCode ?? null,
+            eventData:e.data && typeof e.data === 'object' ? e.data : {},
+          },
         }));
         const {error:eventError}=await admin.from('run_events').insert(rows);
         if (eventError) throw eventError;
