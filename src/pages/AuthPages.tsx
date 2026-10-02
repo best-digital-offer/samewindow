@@ -38,6 +38,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
           password,
           options: {
             data: { full_name: name },
+            emailRedirectTo: window.location.origin,
           },
         });
         if (error) throw error;
