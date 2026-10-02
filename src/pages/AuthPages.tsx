@@ -20,7 +20,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    localStorage.setItem('samewindow_google_auth_redirect', 'dashboard');
+    localStorage.setItem('samewindow_auth_redirect', 'dashboard');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -75,6 +75,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
         return;
       }
 
+      localStorage.setItem('samewindow_auth_redirect', 'dashboard');
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
