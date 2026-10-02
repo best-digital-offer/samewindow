@@ -43,6 +43,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://samewindow.com/blog</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://samewindow.com/blog/how-to-debug-an-ai-agent-in-production</loc>
     <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
