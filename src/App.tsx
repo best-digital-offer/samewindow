@@ -152,7 +152,9 @@ function MainApp() {
         setProjects(loaded);
         const saved = localStorage.getItem('samewindow_active_project_id');
         const active = loaded.find(p => p.id === saved) || loaded[0];
+        if (!active) throw new Error('No project is available for this account.');
         setActiveProjectId(active.id);
+        localStorage.setItem('samewindow_active_project_id', active.id);
         setRuns(await loadRuns(active.id));
       } catch { if (!cancelled) toast('Could not load your workspace data.', 'error'); }
       finally { if (!cancelled) setDataLoading(false); }
@@ -183,16 +185,7 @@ function MainApp() {
     loadRuns(activeProjectId).then(setRuns).catch(() => toast('Could not refresh runs.', 'error'));
   }, [activeProjectId, showDemoRuns]);
 
-  const activeProject =
-    projects.find((p) => p.id === activeProjectId) || projects[0] || {
-      id: 'proj_default',
-      name: 'Default Agent Fleet',
-      description: 'Production agent observability',
-      environment: 'production',
-      createdAt: new Date().toISOString(),
-      redactionKeys: [],
-      retentionDays: 30,
-    };
+  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0] || null;
 
   const handleToggleDemoRuns = () => {
     const nextVal = !showDemoRuns;
@@ -369,6 +362,14 @@ function MainApp() {
   // ----------------------------------------------------
   // AUTHENTICATED DASHBOARD APPLICATION
   // ----------------------------------------------------
+  if (!activeProject) {
+    return (
+      <div className="min-h-screen bg-[#090b0e] text-[#ededef] flex items-center justify-center text-sm text-slate-400">
+        No project is available for this account.
+      </div>
+    );
+  }
+
   const breadcrumbs: { label: string; route?: string }[] = [
     { label: 'Projects', route: '/projects' },
     { label: activeProject.name, route: `/projects/${activeProject.id}/runs` },
