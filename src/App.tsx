@@ -10,6 +10,7 @@ import { Footer } from './components/common/Footer';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { TopNav } from './components/dashboard/TopNav';
 import { Storage } from './lib/storage';
+import { ensureDefaultProject, loadRuns } from './lib/db';
 import { supabase } from './lib/supabase';
 import { AIService } from './services/aiService';
 import { simulateLiveAgentRun, SimulatorScenario } from './lib/simulator';
@@ -62,14 +63,13 @@ function MainApp() {
   // User and project state
   const [user, setUser] = useState<{ email: string; name: string } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>(() => Storage.getProjects());
-  const [activeProjectId, setActiveProjectId] = useState<string>(() =>
-    Storage.getActiveProjectId()
-  );
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string>('');
   const [showDemoRuns, setShowDemoRuns] = useState<boolean>(() =>
     Storage.getShowDemoRuns()
   );
-  const [runs, setRuns] = useState<Run[]>(() => Storage.getRuns(activeProjectId));
+  const [runs, setRuns] = useState<Run[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // Run detail and interactive state
   const [isSimulating, setIsSimulating] = useState(false);
@@ -130,6 +130,26 @@ function MainApp() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!user) { setProjects([]); setActiveProjectId(''); setRuns([]); return; }
+    let cancelled = false;
+    setDataLoading(true);
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      try {
+        const loaded = await ensureDefaultProject(data.user.id);
+        if (cancelled) return;
+        setProjects(loaded);
+        const saved = localStorage.getItem('samewindow_active_project_id');
+        const active = loaded.find(p => p.id === saved) || loaded[0];
+        setActiveProjectId(active.id);
+        setRuns(await loadRuns(active.id));
+      } catch { if (!cancelled) toast('Could not load your workspace data.', 'error'); }
+      finally { if (!cancelled) setDataLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
   // Sync route with browser history
   useEffect(() => {
     const handlePopState = () => {
@@ -149,7 +169,7 @@ function MainApp() {
 
   // Re-fetch runs whenever active project or showDemoRuns changes
   useEffect(() => {
-    setRuns(Storage.getRuns(activeProjectId));
+    loadRuns(activeProjectId).then(setRuns);
   }, [activeProjectId, showDemoRuns]);
 
   const activeProject =
@@ -219,7 +239,7 @@ function MainApp() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || (user && dataLoading)) {
     return <div className="min-h-screen bg-[#090b0e] text-[#ededef] flex items-center justify-center text-sm text-slate-400">Loading SameWindow...</div>;
   }
 
