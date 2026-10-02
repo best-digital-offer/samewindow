@@ -173,28 +173,11 @@ function MainApp() {
     window.scrollTo(0, 0);
   };
 
-  // Re-fetch runs whenever active project or showDemoRuns changes
+  // Re-fetch real persisted runs whenever the active project changes
   useEffect(() => {
     if (!activeProjectId) return;
     loadRuns(activeProjectId).then(setRuns).catch(() => toast('Could not refresh runs.', 'error'));
   }, [activeProjectId]);
-
-  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0] || null;
-
-  const handleSimulateRun = async (scenario: SimulatorScenario = 'finance_401') => {
-    setIsSimulating(true);
-    toast(`Simulating agent execution (${scenario})...`, 'info');
-    try {
-      const newRun = await simulateLiveAgentRun(activeProjectId, scenario);
-      setRuns(await loadRuns(activeProjectId));
-      toast('Agent run completed and recorded to timeline.', 'success');
-      navigate(`/projects/${activeProjectId}/runs/${newRun.id}`);
-    } catch {
-      toast('Simulation encountered an error.', 'error');
-    } finally {
-      setIsSimulating(false);
-    }
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -501,7 +484,6 @@ function MainApp() {
                 }
                 onNavigate={navigate}
                 onCreateKeyClick={() => navigate('/api-keys')}
-                onSimulateRun={handleSimulateRun}
               />
             </div>
           ) : route.startsWith('/projects') && !route.includes('/runs') ? (
@@ -539,7 +521,6 @@ function MainApp() {
               }
               onNavigate={navigate}
               onCreateKeyClick={() => navigate('/api-keys')}
-              onSimulateRun={handleSimulateRun}
             />
           )}
         </main>
