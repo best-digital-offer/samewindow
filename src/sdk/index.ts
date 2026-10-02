@@ -255,7 +255,7 @@ export class SameWindow {
 
     try {
       const endpoint = this.config.endpoint || '/api/ingest';
-      await fetch(endpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,9 +263,17 @@ export class SameWindow {
           'X-Project-Id': this.config.projectId,
         },
         body: JSON.stringify({ runs: batch }),
+        keepalive: true,
       });
-    } catch {
-      // Silently fail: Observability must NEVER crash or block the host agent application!
+
+      if (!response.ok && typeof console !== 'undefined') {
+        console.warn(`SameWindow ingestion failed: HTTP ${response.status}`);
+      }
+    } catch (error) {
+      // Never throw into the host agent. Surface the failure for debugging instead.
+      if (typeof console !== 'undefined') {
+        console.warn('SameWindow ingestion request failed.', error);
+      }
     }
   }
 }
