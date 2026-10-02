@@ -1,0 +1,46 @@
+# SameWindow
+
+> SameWindow is an AI agent flight recorder for developers. It records agent executions so developers can inspect tool calls, replay failures, compare successful and failed runs, and identify the first meaningful divergence.
+
+## Product
+
+- [Homepage](https://samewindow.com/)
+- [Pricing](https://samewindow.com/pricing)
+- [Documentation](https://samewindow.com/docs)
+- [Engineering Blog](https://samewindow.com/blog)
+- [Security](https://samewindow.com/security)
+
+## Core capabilities
+
+- AI agent execution tracing
+- Tool-call inspection
+- Run timelines
+- Failed-run replay
+- Successful vs failed run comparison
+- First divergence detection
+- Token and estimated cost tracking
+- AI-assisted failure analysis
+- Redaction controls
+
+## Developer guides
+
+- [How to Debug an AI Agent in Production](https://samewindow.com/blog/how-to-debug-an-ai-agent-in-production)
+- [AI Agent Observability vs AI Agent Debugging](https://samewindow.com/blog/ai-agent-observability-vs-debugging)
+- [How to Trace Every Tool Call in an AI Agent](https://samewindow.com/blog/how-to-trace-every-tool-call-in-an-ai-agent)
+- [How to Replay a Failed AI Agent Run](https://samewindow.com/blog/how-to-replay-a-failed-ai-agent-run)
+- [How to Find the First Failure in an AI Agent Run](https://samewindow.com/blog/find-the-first-failure-in-an-ai-agent-run)
+- [How to Compare Successful and Failed AI Agent Runs](https://samewindow.com/blog/compare-successful-and-failed-ai-agent-runs)
+- [Why Traditional Logs Aren’t Enough for AI Agents](https://samewindow.com/blog/why-traditional-logs-are-not-enough-for-ai-agents)
+- [How to Debug LangGraph Agents](https://samewindow.com/blog/how-to-debug-langgraph-agents)
+- [How to Debug LangChain Agents](https://samewindow.com/blog/how-to-debug-langchain-agents)
+- [How to Monitor AI Agent Tool Calls](https://samewindow.com/blog/how-to-monitor-ai-agent-tool-calls)
+
+## Documentation
+
+- [Quickstart](https://samewindow.com/docs/quickstart)
+- [JavaScript SDK](https://samewindow.com/docs/javascript)
+- [Ingestion API](https://samewindow.com/docs/api)
+
+## API
+
+The public API surface currently includes health checks, trace ingestion, failure analysis, and run comparison. Persistent trace storage is being connected to the production database layer.
