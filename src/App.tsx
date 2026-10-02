@@ -108,8 +108,8 @@ function MainApp() {
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
-      if (sessionUser && localStorage.getItem('samewindow_google_auth_redirect') === 'dashboard') {
-        localStorage.removeItem('samewindow_google_auth_redirect');
+      if (sessionUser && localStorage.getItem('samewindow_auth_redirect') === 'dashboard') {
+        localStorage.removeItem('samewindow_auth_redirect');
         window.history.replaceState({}, '', '/dashboard');
         setRoute('/dashboard');
       }
@@ -122,8 +122,8 @@ function MainApp() {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       const sessionUser = session?.user;
-      if (sessionUser && localStorage.getItem('samewindow_google_auth_redirect') === 'dashboard') {
-        localStorage.removeItem('samewindow_google_auth_redirect');
+      if (sessionUser && localStorage.getItem('samewindow_auth_redirect') === 'dashboard') {
+        localStorage.removeItem('samewindow_auth_redirect');
         window.history.replaceState({}, '', '/dashboard');
         setRoute('/dashboard');
       }
