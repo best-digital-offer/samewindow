@@ -73,13 +73,21 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
   };
 
   const handleRevoke = async (keyId: string) => {
-    if (confirm('Are you sure you want to revoke this API key? Any agents using it will immediately fail ingestion.')) {
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      const response = await fetch('/api/create-api-key', { method:'DELETE', headers:{'Content-Type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, body:JSON.stringify({keyId}) });
-      if (!response.ok) throw new Error('Unable to revoke API key.');
+    if (!confirm('Are you sure you want to revoke this API key? Any agents using it will immediately fail ingestion.')) return;
+
+    try {
+      const { error } = await supabase
+        .from('api_keys')
+        .update({ revoked_at: new Date().toISOString() })
+        .eq('id', keyId)
+        .eq('project_id', activeProject.id);
+
+      if (error) throw error;
+
       setKeys((current) => current.filter((k) => k.id !== keyId));
       toast('API Key revoked.', 'info');
+    } catch (error: any) {
+      toast(error?.message || 'Unable to revoke API key.', 'error');
     }
   };
 
