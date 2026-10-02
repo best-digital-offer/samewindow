@@ -65,9 +65,7 @@ function MainApp() {
   const [authLoading, setAuthLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string>('');
-  const [showDemoRuns, setShowDemoRuns] = useState<boolean>(() =>
-    Storage.getShowDemoRuns()
-  );
+  const [showDemoRuns, setShowDemoRuns] = useState(false);
   const [runs, setRuns] = useState<Run[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
 
@@ -150,11 +148,11 @@ function MainApp() {
         const loaded = await ensureDefaultProject(data.user.id);
         if (cancelled) return;
         setProjects(loaded);
-        const saved = localStorage.getItem('samewindow_active_project_id');
+        const saved = localStorage.getItem(`samewindow_active_project_id:${data.user.id}`);
         const active = loaded.find(p => p.id === saved) || loaded[0];
         if (!active) throw new Error('No project is available for this account.');
         setActiveProjectId(active.id);
-        localStorage.setItem('samewindow_active_project_id', active.id);
+        localStorage.setItem(`samewindow_active_project_id:${data.user.id}`, active.id);
         setRuns(await loadRuns(active.id));
       } catch { if (!cancelled) toast('Could not load your workspace data.', 'error'); }
       finally { if (!cancelled) setDataLoading(false); }
@@ -181,15 +179,14 @@ function MainApp() {
 
   // Re-fetch runs whenever active project or showDemoRuns changes
   useEffect(() => {
-    if (!activeProjectId || showDemoRuns) return;
+    if (!activeProjectId) return;
     loadRuns(activeProjectId).then(setRuns).catch(() => toast('Could not refresh runs.', 'error'));
-  }, [activeProjectId, showDemoRuns]);
+  }, [activeProjectId]);
 
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0] || null;
 
   const handleToggleDemoRuns = () => {
     const nextVal = !showDemoRuns;
-    Storage.setShowDemoRuns(nextVal);
     setShowDemoRuns(nextVal);
     toast(
       nextVal
@@ -204,7 +201,7 @@ function MainApp() {
     toast(`Simulating agent execution (${scenario})...`, 'info');
     try {
       const newRun = await simulateLiveAgentRun(activeProjectId, scenario);
-      setRuns(Storage.getRuns(activeProjectId));
+      setRuns(await loadRuns(activeProjectId));
       toast('Agent run completed and recorded to timeline.', 'success');
       navigate(`/projects/${activeProjectId}/runs/${newRun.id}`);
     } catch {
@@ -234,12 +231,16 @@ function MainApp() {
     }
   };
 
-  const handleDeleteRun = (runId: string) => {
-    if (confirm('Delete this execution run trace permanently?')) {
-      Storage.deleteRun(runId);
-      setRuns(Storage.getRuns(activeProjectId));
+  const handleDeleteRun = async (runId: string) => {
+    if (!confirm('Delete this execution run trace permanently?')) return;
+    try {
+      const { error } = await supabase.from('runs').delete().eq('id', runId).eq('project_id', activeProjectId);
+      if (error) throw error;
+      setRuns(await loadRuns(activeProjectId));
       toast('Run trace deleted.', 'info');
       navigate(`/projects/${activeProjectId}/runs`);
+    } catch (error: any) {
+      toast(error?.message || 'Unable to delete run trace.', 'error');
     }
   };
 
@@ -399,7 +400,7 @@ function MainApp() {
         activeProjectId={activeProjectId}
         onSelectProject={(id) => {
           setActiveProjectId(id);
-          localStorage.setItem('samewindow_active_project_id', id);
+          if (user?.email) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
         }}
         onCreateProjectClick={() => navigate('/projects')}
         userEmail={user?.email || 'developer@samewindow.io'}
