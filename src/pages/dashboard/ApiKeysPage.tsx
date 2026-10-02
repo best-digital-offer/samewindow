@@ -19,11 +19,14 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
   const [newKeyName, setNewKeyName] = useState('');
   const [generatedSecret, setGeneratedSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newKeyName.trim()) return;
+    if (!newKeyName.trim() || creating) return;
+    setCreating(true);
 
+    try {
     const session = await supabase.auth.getSession();
     const token = session.data.session?.access_token;
     const response = await fetch('/api/create-api-key', { method:'POST', headers:{'Content-Type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, body:JSON.stringify({projectId:activeProject.id,name:newKeyName.trim()}) });
@@ -35,6 +38,12 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
     setGeneratedSecret(rawSecret);
     setNewKeyName('');
     toast('API Key generated successfully.', 'success');
+    setCreateModalOpen(false);
+    } catch (error: any) {
+      toast(error?.message || 'Unable to create API key. Please try again.', 'error');
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleRevoke = async (keyId: string) => {
@@ -196,7 +205,7 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
               type="submit"
               className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500"
             >
-              Generate Key
+              {creating ? 'Generating...' : 'Generate Key'}
             </button>
           </div>
         </form>
