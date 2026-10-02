@@ -108,6 +108,11 @@ function MainApp() {
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       const sessionUser = data.session?.user;
+      if (sessionUser && localStorage.getItem('samewindow_google_auth_redirect') === 'dashboard') {
+        localStorage.removeItem('samewindow_google_auth_redirect');
+        window.history.replaceState({}, '', '/dashboard');
+        setRoute('/dashboard');
+      }
       setUser(sessionUser ? {
         email: sessionUser.email || '',
         name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || 'Developer',
@@ -117,6 +122,11 @@ function MainApp() {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       const sessionUser = session?.user;
+      if (sessionUser && localStorage.getItem('samewindow_google_auth_redirect') === 'dashboard') {
+        localStorage.removeItem('samewindow_google_auth_redirect');
+        window.history.replaceState({}, '', '/dashboard');
+        setRoute('/dashboard');
+      }
       setUser(sessionUser ? {
         email: sessionUser.email || '',
         name: (sessionUser.user_metadata?.full_name as string) || sessionUser.email?.split('@')[0] || 'Developer',
