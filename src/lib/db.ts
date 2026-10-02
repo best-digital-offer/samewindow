@@ -81,6 +81,12 @@ function mapEvent(e:any): RunEvent {
     id:e.id, runId:e.run_id, timestamp:e.started_at || e.created_at,
     offsetMs:Number(e.metadata?.offsetMs || 0), type:e.event_type, title:e.name || e.event_type,
     status:e.status, statusCode:e.metadata?.statusCode, durationMs:e.duration_ms || undefined,
-    data:{ ...(e.metadata || {}), rawInput:e.input, rawOutput:e.output, error:e.error || undefined },
+    data:{
+      ...(e.metadata?.eventData || {}),
+      ...(e.metadata || {}),
+      rawInput:e.input,
+      rawOutput:e.output,
+      error:e.error || undefined,
+    },
   };
 }
