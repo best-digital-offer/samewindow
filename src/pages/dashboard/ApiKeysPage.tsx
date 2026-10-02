@@ -27,18 +27,44 @@ export const ApiKeysPage: React.FC<ApiKeysPageProps> = ({ activeProject }) => {
     setCreating(true);
 
     try {
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.access_token;
-    const response = await fetch('/api/create-api-key', { method:'POST', headers:{'Content-Type':'application/json', ...(token ? {Authorization:`Bearer ${token}`} : {})}, body:JSON.stringify({projectId:activeProject.id,name:newKeyName.trim()}) });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || 'Unable to create API key.');
-    const { rawSecret } = payload;
-    const key = payload.key as ApiKey;
-    setKeys((current) => [key, ...current]);
-    setGeneratedSecret(rawSecret);
-    setNewKeyName('');
-    toast('API Key generated successfully.', 'success');
-    setCreateModalOpen(false);
+      const session = await supabase.auth.getSession();
+      if (!session.data.session?.user) throw new Error('Your session has expired. Please sign in again.');
+
+      const bytes = new Uint8Array(20);
+      crypto.getRandomValues(bytes);
+      const secret = 'sw_live_' + Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+      const hash = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      const prefix = secret.slice(0, 13) + '...' + secret.slice(-4);
+
+      const { data, error } = await supabase
+        .from('api_keys')
+        .insert({
+          project_id: activeProject.id,
+          name: newKeyName.trim(),
+          key_prefix: prefix,
+          key_hash: hash,
+        })
+        .select('id,project_id,name,key_prefix,last_used_at,created_at')
+        .single();
+
+      if (error) throw error;
+
+      const key: ApiKey = {
+        id: data.id,
+        projectId: data.project_id,
+        name: data.name,
+        prefix: data.key_prefix,
+        createdAt: data.created_at,
+        lastUsedAt: data.last_used_at || undefined,
+      };
+
+      setKeys((current) => [key, ...current]);
+      setGeneratedSecret(secret);
+      setNewKeyName('');
+      setCreateModalOpen(false);
+      toast('API Key generated successfully.', 'success');
     } catch (error: any) {
       toast(error?.message || 'Unable to create API key. Please try again.', 'error');
     } finally {
