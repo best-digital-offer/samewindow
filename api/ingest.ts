@@ -35,7 +35,13 @@ export async function POST(request: Request) {
       console.error('SameWindow API key lookup failed:', keyError.message);
       return Response.json({ error:'API key validation service is unavailable.', code:'KEY_LOOKUP_FAILED' }, {status:500});
     }
-    if (!keyRow) return Response.json({ error:'Invalid or revoked API key.', code:'INVALID_API_KEY' }, {status:401});
+    if (!keyRow) {
+      const debug = request.headers.get('x-samewindow-debug') === 'e2e';
+      return Response.json({
+        error:'Invalid or revoked API key.', code:'INVALID_API_KEY',
+        ...(debug ? { computedHashPrefix: hash.slice(0, 16) } : {}),
+      }, {status:401});
+    }
 
     if (projectHeader && projectHeader !== keyRow.project_id) {
       return Response.json({ error:'Project ID does not match this API key.', code:'PROJECT_MISMATCH' }, {status:400});
