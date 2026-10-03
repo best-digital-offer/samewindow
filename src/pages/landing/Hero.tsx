@@ -55,22 +55,22 @@ export const Hero: React.FC<HeroProps> = ({ onStartFree, onViewDemo }) => {
       {/* Hero Visual: Realistic High-Fidelity Flight Recorder Window */}
       <div className="max-w-5xl mx-auto mt-12 rounded-xl border border-[#242d3d] bg-[#090c12] shadow-2xl overflow-hidden text-left">
         {/* Window Chrome */}
-        <div className="px-4 py-2.5 bg-[#0e121a] border-b border-[#1f2635] flex items-center justify-between text-xs">
+        <div className="px-4 py-2.5 bg-[#0e121a] border-b border-[#1f2635] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#323b4c]" />
               <span className="w-2.5 h-2.5 rounded-full bg-[#323b4c]" />
               <span className="w-2.5 h-2.5 rounded-full bg-[#323b4c]" />
             </div>
-            <span className="ml-2 font-mono text-[11px] text-slate-400">
+            <span className="ml-2 font-mono text-[11px] text-slate-400 break-all">
               samewindow://recorder/runs/1842
             </span>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-[11px]">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] min-w-0">
             <span className="text-rose-400 font-bold">RUN #1842 · FAILED</span>
             <span className="text-slate-400">·</span>
-            <span className="text-slate-400">Customer Support Agent</span>
+            <span className="text-slate-400 break-words sm:whitespace-nowrap">Customer Support Agent</span>
           </div>
         </div>
 
