@@ -9,6 +9,7 @@ interface ProjectsPageProps {
   projects: Project[];
   activeProjectId: string;
   onSelectProject: (id: string) => void;
+  onProjectCreated: (project: Project) => void;
   onNavigate: (route: string) => void;
 }
 
@@ -16,6 +17,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
   projects,
   activeProjectId,
   onSelectProject,
+  onProjectCreated,
   onNavigate,
 }) => {
   const { toast } = useToast();
@@ -36,6 +38,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
     setCreateModal(false);
     setName('');
     setDescription('');
+    onProjectCreated(newProj);
     onSelectProject(newProj.id);
     onNavigate(`/projects/${newProj.id}/runs`);
   };
