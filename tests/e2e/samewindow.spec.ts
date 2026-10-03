@@ -113,8 +113,9 @@ test.describe('SameWindow authenticated regression suite', () => {
       },
     });
 
-    expect(response.status()).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({ success: true, persisted: true, ingested: 1 });
+    const responseBody = await response.json();
+    expect(response.status(), JSON.stringify(responseBody)).toBe(200);
+    expect(responseBody).toMatchObject({ success: true, persisted: true, ingested: 1 });
 
     await page.goto(`/projects/${projectId}/runs`);
     await expect(page.getByText(agentName, { exact: false })).toBeVisible();
