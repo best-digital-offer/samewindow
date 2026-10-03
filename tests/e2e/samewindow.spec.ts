@@ -60,6 +60,7 @@ test.describe('SameWindow authenticated regression suite', () => {
       headers: {
         Authorization: `Bearer ${secret!.trim()}`,
         'X-Project-Id': projectId!,
+        'X-SameWindow-API-Key': secret!.trim(),
         'X-SameWindow-Debug': 'e2e',
       },
       data: {
