@@ -25,7 +25,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
       <div className="rounded-xl border border-[#21293a] bg-[#090c12] p-5 sm:p-8 shadow-2xl space-y-6">
         {/* Highlight callout box */}
         <div className="p-3.5 rounded-lg bg-rose-950/30 border border-rose-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-rose-300 font-mono">
+          <div className="flex items-start gap-2 text-rose-300 font-mono min-w-0 break-words">
             <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>
               First meaningful divergence detected at step 5: <code className="text-rose-200 font-bold bg-rose-900/50 px-1 py-0.5 rounded">process_refund</code>
@@ -43,7 +43,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
           {/* Column A: SUCCESSFUL RUN */}
           <div className="p-4 rounded-xl bg-[#080d16] border border-emerald-950/60 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-emerald-900/40 text-emerald-400 font-bold">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pb-2 border-b border-emerald-900/40 text-emerald-400 font-bold">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 SUCCESSFUL RUN (#1841)
@@ -52,7 +52,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
             </div>
 
             <div className="space-y-2 text-slate-300">
-              <div className="p-2 rounded bg-[#0b121e] border border-[#162234] flex items-center justify-between">
+              <div className="p-2 rounded bg-[#0b121e] border border-[#162234] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <span>01. User request received</span>
                 <span className="text-[10px] text-slate-400">+00:00.000</span>
               </div>
@@ -83,7 +83,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
 
           {/* Column B: FAILED RUN */}
           <div className="p-4 rounded-xl bg-[#14080a] border border-rose-950/60 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-rose-900/40 text-rose-400 font-bold">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pb-2 border-b border-rose-900/40 text-rose-400 font-bold">
               <span className="flex items-center gap-1.5">
                 <XCircle className="w-3.5 h-3.5" />
                 FAILED RUN (#1842)
@@ -92,7 +92,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
             </div>
 
             <div className="space-y-2 text-slate-300">
-              <div className="p-2 rounded bg-[#180b0e] border border-[#2c1318] flex items-center justify-between">
+              <div className="p-2 rounded bg-[#180b0e] border border-[#2c1318] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <span>01. User request received</span>
                 <span className="text-[10px] text-slate-400">+00:00.000</span>
               </div>
@@ -109,7 +109,7 @@ export const SignatureFeature: React.FC<SignatureFeatureProps> = ({ onTryCompare
                 <span className="text-[10px] text-emerald-400 font-bold">200 OK</span>
               </div>
               {/* Divergent Node */}
-              <div className="p-2 rounded bg-rose-950/80 border-2 border-rose-500 flex items-center justify-between text-rose-200 font-bold shadow-md">
+              <div className="p-2 rounded bg-rose-950/80 border-2 border-rose-500 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-rose-200 font-bold shadow-md">
                 <div className="flex items-center gap-2">
                   <span>05. Tool: process_refund</span>
                   <span className="text-[9px] uppercase bg-rose-800 text-white px-1 rounded animate-pulse">
