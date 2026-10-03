@@ -91,7 +91,7 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
 
                 <div className="pt-2 border-t border-[#171d28] flex items-center justify-between text-[11px] font-mono text-slate-400">
                   <span>Retention: {proj.retentionDays}d</span>
-                  <span>ID: {proj.id.slice(0, 12)}</span>
+                  <span className="break-all text-right" title={proj.id}>ID: {proj.id}</span>
                 </div>
               </div>
 
