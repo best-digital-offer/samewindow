@@ -33,6 +33,93 @@ test.describe('SameWindow authenticated regression suite', () => {
     await expect(page).toHaveURL(/\/projects\/[0-9a-f-]+\/runs$/i);
   });
 
+  test('real SDK ingestion reaches the production Runs UI', async ({ page }) => {
+    const projectName = `Ingestion QA ${Date.now()}`;
+    const agentName = `Playwright Ingestion Agent ${Date.now()}`;
+
+    await page.goto('/projects');
+    await page.getByRole('button', { name: 'New Project' }).click();
+    await page.getByLabel('Project Name').fill(projectName);
+    await page.getByRole('button', { name: 'Create Project' }).click();
+
+    await expect(page).toHaveURL(/\/projects\/[0-9a-f-]+\/runs$/i);
+    const projectId = page.url().match(/\/projects\/([0-9a-f-]+)\/runs$/i)?.[1];
+    expect(projectId).toBeTruthy();
+
+    await page.goto(`/projects/${projectId}/api-keys`);
+    await expect(page.getByText('API Ingestion Keys')).toBeVisible();
+    await page.getByRole('button', { name: 'Create New Key' }).click();
+    await page.getByPlaceholder('e.g. Production Ingest Agent Worker').fill('Playwright E2E Ingestion');
+    await page.getByRole('button', { name: 'Generate Key' }).click();
+
+    const secret = await page.locator('span.select-all').textContent();
+    expect(secret).toMatch(/^sw_live_[0-9a-f]+$/);
+
+    const runId = `playwright_${Date.now()}`;
+    const response = await page.request.post('/api/ingest', {
+      headers: {
+        Authorization: `Bearer ${secret!.trim()}`,
+        'X-Project-Id': projectId!,
+      },
+      data: {
+        runs: [{
+          id: runId,
+          agentName,
+          status: 'SUCCESS',
+          startedAt: new Date(Date.now() - 250).toISOString(),
+          completedAt: new Date().toISOString(),
+          durationMs: 250,
+          model: 'playwright-test-model',
+          environment: 'production',
+          inputTokens: 12,
+          outputTokens: 8,
+          totalTokens: 20,
+          estimatedCost: 0.00005,
+          events: [{
+            id: `event_${Date.now()}`,
+            type: 'USER_INPUT',
+            title: 'Playwright E2E Input',
+            status: 'OK',
+            timestamp: new Date(Date.now() - 200).toISOString(),
+            offsetMs: 50,
+            data: { userInput: 'E2E ingestion verification' },
+          }, {
+            id: `event_model_${Date.now()}`,
+            type: 'MODEL_CALL',
+            title: 'Model: playwright-test-model',
+            status: 'OK',
+            timestamp: new Date(Date.now() - 100).toISOString(),
+            offsetMs: 150,
+            durationMs: 100,
+            data: {
+              modelCall: {
+                model: 'playwright-test-model',
+                inputTokens: 12,
+                outputTokens: 8,
+                responsePreview: 'E2E ingestion verified',
+              },
+            },
+          }, {
+            id: `event_final_${Date.now()}`,
+            type: 'FINAL_RESPONSE',
+            title: 'Final Response',
+            status: 'OK',
+            timestamp: new Date().toISOString(),
+            offsetMs: 250,
+            data: { finalResponse: 'E2E ingestion verified' },
+          }],
+        }],
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ success: true, persisted: true, ingested: 1 });
+
+    await page.goto(`/projects/${projectId}/runs`);
+    await expect(page.getByText(agentName, { exact: false })).toBeVisible();
+    await expect(page.getByText('SUCCESS', { exact: false }).first()).toBeVisible();
+  });
+
   test('project settings survives navigation and refresh', async ({ page }) => {
     await page.goto('/projects');
     const projectCard = page.locator('div').filter({ hasText: /^sai$/ }).first();
