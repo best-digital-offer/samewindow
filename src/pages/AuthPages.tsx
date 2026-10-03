@@ -215,6 +215,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                     <input
                       id="auth-password"
                       type="password"
+                      autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                       required
                       minLength={8}
                       placeholder="At least 8 characters"
