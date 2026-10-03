@@ -178,6 +178,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                 <div>
                   <label htmlFor="auth-email" className="block text-slate-400 mb-1">Email</label>
                   <input
+                    id="auth-email"
                     type="email"
                     required
                     placeholder="you@example.com"
