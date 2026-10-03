@@ -11,6 +11,8 @@ export interface SameWindowConfig {
   batchSize?: number;
   flushIntervalMs?: number;
   disabled?: boolean;
+  maxRetries?: number;
+  retryBaseDelayMs?: number;
 }
 
 export class AgentRunRecorder {
@@ -222,6 +224,8 @@ export class SameWindow {
       batchSize: 10,
       flushIntervalMs: 5000,
       disabled: false,
+      maxRetries: 3,
+      retryBaseDelayMs: 500,
       ...config,
     };
 
@@ -255,20 +259,45 @@ export class SameWindow {
 
     try {
       const endpoint = this.config.endpoint || '/api/ingest';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'X-SameWindow-API-Key': this.config.apiKey,
-          'X-Project-Id': this.config.projectId,
-        },
-        body: JSON.stringify({ runs: batch }),
-        keepalive: true,
-      });
+      const maxRetries = Math.max(0, this.config.maxRetries ?? 3);
+      const baseDelayMs = Math.max(100, this.config.retryBaseDelayMs ?? 500);
 
-      if (!response.ok && typeof console !== 'undefined') {
-        console.warn(`SameWindow ingestion failed: HTTP ${response.status}`);
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.config.apiKey}`,
+              'X-SameWindow-API-Key': this.config.apiKey,
+              'X-Project-Id': this.config.projectId,
+            },
+            body: JSON.stringify({ runs: batch }),
+            keepalive: true,
+          });
+
+          if (response.ok) return;
+
+          // Retry only transient failures. Auth/validation failures should not be retried.
+          const retryable = response.status === 408 || response.status === 425 ||
+            response.status === 429 || response.status >= 500;
+          if (!retryable || attempt === maxRetries) {
+            if (typeof console !== 'undefined') {
+              console.warn(`SameWindow ingestion failed: HTTP ${response.status}`);
+            }
+            return;
+          }
+
+          const retryAfter = Number(response.headers.get('Retry-After'));
+          const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
+            ? retryAfter * 1000
+            : baseDelayMs * Math.pow(2, attempt);
+
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        } catch (error) {
+          if (attempt === maxRetries) throw error;
+          await new Promise(resolve => setTimeout(resolve, baseDelayMs * Math.pow(2, attempt)));
+        }
       }
     } catch (error) {
       // Never throw into the host agent. Surface the failure for debugging instead.
