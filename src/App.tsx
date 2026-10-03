@@ -50,6 +50,17 @@ import { AiAnalysisModal } from './components/run/AiAnalysisModal';
 import { RunComparison } from './components/compare/RunComparison';
 import { RunsTable } from './components/dashboard/RunsTable';
 
+const NotFoundPage: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <main className="max-w-3xl mx-auto px-4 sm:px-6 py-24 text-center">
+    <div className="text-xs font-mono text-indigo-300 mb-3">404 / PAGE NOT FOUND</div>
+    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">This page does not exist.</h1>
+    <p className="mt-4 text-slate-400">The URL may be outdated, incorrect, or no longer available.</p>
+    <button onClick={() => onNavigate('/')} className="mt-7 px-4 py-2 rounded-md bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500">
+      Back to SameWindow
+    </button>
+  </main>
+);
+
 function MainApp() {
   const { toast } = useToast();
 
@@ -236,6 +247,23 @@ function MainApp() {
 
   // If user is not authenticated and attempts to access dashboard route, prompt to sign in
   const shouldShowAuthGuard = isDashboardRoute && !user;
+  const isKnownPublicRoute =
+    route === '/' ||
+    route === '/pricing' ||
+    route === '/docs' ||
+    route.startsWith('/docs/') ||
+    route === '/security' ||
+    route === '/status' ||
+    route === '/about' ||
+    route === '/contact' ||
+    route === '/privacy' ||
+    route === '/terms' ||
+    route === '/refund' ||
+    route === '/blog' ||
+    route.startsWith('/blog/') ||
+    route === '/signin' ||
+    route === '/signup' ||
+    route === '/forgot-password';
 
   // Render Public Website (when on marketing or public routes)
   if (!isDashboardRoute || shouldShowAuthGuard) {
@@ -277,6 +305,10 @@ function MainApp() {
         />
 
         <main className="flex-1">
+          {!isKnownPublicRoute ? (
+            <NotFoundPage onNavigate={navigate} />
+          ) : (
+            <>
           {route === '/' && (
             <>
               <Hero
@@ -321,6 +353,8 @@ function MainApp() {
           {route === '/refund' && <RefundPage />}
           {route === '/blog' && <BlogPage onNavigate={navigate} />}
           {route.startsWith('/blog/') && <BlogPage slug={route.slice('/blog/'.length)} onNavigate={navigate} />}
+            </>
+          )}
         </main>
 
         <Footer onNavigate={navigate} />
