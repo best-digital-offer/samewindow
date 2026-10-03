@@ -75,6 +75,27 @@ test.describe('SameWindow authenticated regression suite', () => {
     const responseBody = await response.json();
     expect(response.status(), JSON.stringify(responseBody)).toBe(200);
     expect(responseBody).toMatchObject({ success: true, persisted: true, ingested: 1 });
+
+    // A retry of the exact same run must be idempotent.
+    const retry = await page.request.post('/api/ingest', {
+      headers: {
+        Authorization: `Bearer ${secret!.trim()}`,
+        'X-Project-Id': projectId!,
+        'X-SameWindow-API-Key': secret!.trim(),
+      },
+      data: {
+        runs: [{
+          id: runId, agentName, status: 'SUCCESS',
+          startedAt: new Date(Date.now() - 250).toISOString(), completedAt: new Date().toISOString(),
+          durationMs: 250, model: 'playwright-test-model', environment: 'production',
+          inputTokens: 12, outputTokens: 8, totalTokens: 20, estimatedCost: 0.00005,
+          events: [],
+        }],
+      },
+    });
+    const retryBody = await retry.json();
+    expect(retry.status(), JSON.stringify(retryBody)).toBe(200);
+    expect(retryBody).toMatchObject({ success: true, persisted: true, ingested: 1 });
     await page.goto(`/projects/${projectId}/runs`);
     await expect(page.getByText(agentName, { exact: false })).toBeVisible();
     await expect(page.getByText('SUCCESS', { exact: false }).first()).toBeVisible();
