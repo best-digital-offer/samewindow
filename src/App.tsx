@@ -497,7 +497,9 @@ function MainApp() {
               activeProjectId={activeProjectId}
               onSelectProject={(id) => {
                 setActiveProjectId(id);
-                if (user) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
+                supabase.auth.getUser().then(({ data }) => {
+                  if (data.user) localStorage.setItem(`samewindow_active_project_id:${data.user.id}`, id);
+                });
               }}
               onProjectCreated={(project) => {
                 setProjects((current) => [...current, project]);
