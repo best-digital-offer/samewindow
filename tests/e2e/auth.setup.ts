@@ -14,7 +14,7 @@ setup('authenticate test account', async ({ page }) => {
   await page.goto('/signin');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign In' }).click();
+  await page.getByRole('main').getByRole('button', { name: 'Sign In' }).click();
 
   await expect(page).toHaveURL(/\/dashboard(?:\/|$)/);
   await expect(page.getByText('Agent Fleet', { exact: false }).first()).toBeVisible();
