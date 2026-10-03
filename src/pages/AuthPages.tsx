@@ -17,6 +17,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -37,6 +38,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError('');
 
     try {
       if (mode === 'forgot-password') {
@@ -86,7 +88,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
       });
       toast('Signed in successfully.', 'success');
     } catch (error: any) {
-      toast(error?.message || 'Authentication failed.', 'error');
+      const message = error?.message || 'Authentication failed. Please check your details and try again.';
+      setAuthError(message);
+      toast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -159,6 +163,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                 </>
               )}
 
+              {authError && (
+                <div role="alert" aria-live="polite" className="rounded-lg border border-rose-900/50 bg-rose-950/30 px-3 py-2.5 text-xs text-rose-200">
+                  {authError}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-3 text-xs">
                 {mode === 'signup' && (
                   <div>
@@ -183,7 +193,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                     required
                     placeholder="you@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); if (authError) setAuthError(''); }}
                     className="w-full p-2.5 rounded-lg bg-[#10141d] border border-[#212836] text-white focus:outline-none focus:border-indigo-500/50"
                   />
                 </div>
@@ -209,7 +219,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                       minLength={8}
                       placeholder="At least 8 characters"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => { setPassword(e.target.value); if (authError) setAuthError(''); }}
                       className="w-full p-2.5 rounded-lg bg-[#10141d] border border-[#212836] text-white focus:outline-none focus:border-indigo-500/50"
                     />
                   </div>
