@@ -62,6 +62,17 @@ export async function POST(request: Request) {
       }
 
       const metadata = { ...(run.metadata && typeof run.metadata === 'object' ? run.metadata : {}), agentName, environment:run.environment || 'production', tags:run.tags || [] };
+      // Idempotency: retries with the same external run ID must not create duplicate runs.
+      if (run.id) {
+        const { data:existingRun, error:existingRunError } = await admin.from('runs')
+          .select('id').eq('project_id',keyRow.project_id).eq('external_run_id',String(run.id)).maybeSingle();
+        if (existingRunError) throw existingRunError;
+        if (existingRun) {
+          ingested++;
+          continue;
+        }
+      }
+
       const { data:inserted, error:runError} = await admin.from('runs').insert({
         project_id:keyRow.project_id, agent_id:agentId, external_run_id:run.id || null,
         status:run.status || 'SUCCESS', started_at:run.startedAt || now, ended_at:run.completedAt || now,
