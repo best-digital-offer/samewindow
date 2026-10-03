@@ -499,6 +499,9 @@ function MainApp() {
                 setActiveProjectId(id);
                 if (user) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
               }}
+              onProjectCreated={(project) => {
+                setProjects((current) => [...current, project]);
+              }}
               onNavigate={navigate}
             />
           ) : route === '/api-keys' ? (
