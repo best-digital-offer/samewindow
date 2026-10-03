@@ -46,7 +46,7 @@ test.describe('SameWindow authenticated regression suite', () => {
     const projectId = page.url().match(/\/projects\/([0-9a-f-]+)\/runs$/i)?.[1];
     expect(projectId).toBeTruthy();
 
-    await page.goto(`/projects/${projectId}/api-keys`);
+    await page.goto('/api-keys');
     await expect(page.getByText('API Ingestion Keys')).toBeVisible();
     await page.getByRole('button', { name: 'Create New Key' }).click();
     await page.getByPlaceholder('e.g. Production Ingest Agent Worker').fill('Playwright E2E Ingestion');
