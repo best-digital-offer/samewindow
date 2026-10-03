@@ -260,6 +260,7 @@ export class SameWindow {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.apiKey}`,
+          'X-SameWindow-API-Key': this.config.apiKey,
           'X-Project-Id': this.config.projectId,
         },
         body: JSON.stringify({ runs: batch }),
