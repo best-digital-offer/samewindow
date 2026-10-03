@@ -105,7 +105,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ currentSubPage = 'quickstart
                     <span>{copiedKey === 'code1' ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-                <pre className="text-slate-300">
+                <pre className="text-slate-300 overflow-x-auto whitespace-pre-wrap break-words">
                   {`import { SameWindow } from "samewindow";
 
 const sw = new SameWindow({
