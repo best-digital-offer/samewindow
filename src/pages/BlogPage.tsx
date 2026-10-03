@@ -138,6 +138,17 @@ export const BLOG_ARTICLES = ARTICLES;
 export const BlogPage: React.FC<{ slug?: string; onNavigate: (route: string) => void }> = ({ slug, onNavigate }) => {
   const article = slug ? ARTICLES.find((item) => item.slug === slug) : undefined;
 
+  if (slug && !article) {
+    return (
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-24 text-center">
+        <div className="text-xs font-mono text-indigo-300 mb-3">404 / ARTICLE NOT FOUND</div>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">That article does not exist.</h1>
+        <p className="mt-4 text-slate-400">The article URL may be outdated or incorrect.</p>
+        <button onClick={() => onNavigate('/blog')} className="mt-7 px-4 py-2 rounded-md bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-500">Back to Blog</button>
+      </main>
+    );
+  }
+
   if (article) {
     return (
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
