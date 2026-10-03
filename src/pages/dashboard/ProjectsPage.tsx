@@ -121,8 +121,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
       >
         <form onSubmit={handleCreate} className="space-y-4 text-xs text-slate-300">
           <div>
-            <label className="block text-slate-400 mb-1">Project Name</label>
+            <label htmlFor="project-name" className="block text-slate-400 mb-1">Project Name</label>
             <input
+              id="project-name"
               type="text"
               required
               placeholder="e.g. Autonomous Customer Support"
@@ -133,8 +134,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1">Description</label>
+            <label htmlFor="project-description" className="block text-slate-400 mb-1">Description</label>
             <textarea
+              id="project-description"
               rows={3}
               placeholder="Primary tool-calling agents and finance mutation workflows"
               value={description}
@@ -144,8 +146,9 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1">Target Environment</label>
+            <label htmlFor="project-environment" className="block text-slate-400 mb-1">Target Environment</label>
             <select
+              id="project-environment"
               value={env}
               onChange={(e) => setEnv(e.target.value as any)}
               className="w-full p-2.5 rounded-lg bg-[#10141d] border border-[#212836] text-white focus:outline-none focus:border-indigo-500/50"
