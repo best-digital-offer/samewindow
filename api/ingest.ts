@@ -17,7 +17,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const auth = request.headers.get('authorization') || '';
-    const apiKey = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+    const headerKey = request.headers.get('x-samewindow-api-key') || '';
+    const apiKey = auth.startsWith('Bearer ') ? auth.slice(7).trim() : headerKey.trim();
     const projectHeader = request.headers.get('x-project-id') || '';
     if (!apiKey) return Response.json({ error:'Missing API key.', code:'MISSING_API_KEY' }, {status:401});
 
