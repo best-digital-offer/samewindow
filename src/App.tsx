@@ -331,6 +331,8 @@ function MainApp() {
   // ----------------------------------------------------
   // AUTHENTICATED DASHBOARD APPLICATION
   // ----------------------------------------------------
+  const activeProject = projects.find((p) => p.id === activeProjectId) || null;
+
   if (!activeProject) {
     return (
       <div className="min-h-screen bg-[#090b0e] text-[#ededef] flex items-center justify-center text-sm text-slate-400">
@@ -495,7 +497,7 @@ function MainApp() {
               activeProjectId={activeProjectId}
               onSelectProject={(id) => {
                 setActiveProjectId(id);
-                if (user?.email) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
+                if (user) localStorage.setItem(`samewindow_active_project_id:${user.email}`, id);
               }}
               onNavigate={navigate}
             />
