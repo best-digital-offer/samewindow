@@ -49,7 +49,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ onSelectPlan, isAuthen
       {/* Pricing Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {PRICING_PLANS.map((plan) => {
-          const isCurrent = currentSub.planId === plan.id;
+          const isCurrent = isAuthenticated && currentSub.planId === plan.id;
           return (
             <div
               key={plan.id}
