@@ -162,8 +162,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
               <form onSubmit={handleSubmit} className="space-y-3 text-xs">
                 {mode === 'signup' && (
                   <div>
-                    <label className="block text-slate-400 mb-1">Full Name</label>
+                    <label htmlFor="full-name" className="block text-slate-400 mb-1">Full Name</label>
                     <input
+                      id="full-name"
                       type="text"
                       required
                       placeholder="Ada Lovelace"
@@ -175,7 +176,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                 )}
 
                 <div>
-                  <label className="block text-slate-400 mb-1">Email</label>
+                  <label htmlFor="auth-email" className="block text-slate-400 mb-1">Email</label>
                   <input
                     type="email"
                     required
@@ -189,7 +190,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                 {mode !== 'forgot-password' && (
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-slate-400">Password</label>
+                      <label htmlFor="auth-password" className="text-slate-400">Password</label>
                       {mode === 'signin' && (
                         <button
                           type="button"
@@ -201,6 +202,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode, onSuccess, onNavigate 
                       )}
                     </div>
                     <input
+                      id="auth-password"
                       type="password"
                       required
                       minLength={8}
