@@ -78,13 +78,13 @@ export const Hero: React.FC<HeroProps> = ({ onStartFree, onViewDemo }) => {
         <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-[#1a212e]">
           {/* Left: Chronological Trace (7 cols) */}
           <div className="md:col-span-7 p-5 space-y-3 font-mono text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-[#161c27] text-[11px] text-slate-400">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pb-2 border-b border-[#161c27] text-[11px] text-slate-400">
               <span>CHRONOLOGICAL EXECUTION TIMELINE</span>
               <span>DURATION: 3.024s</span>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-start gap-3 text-slate-300">
+              <div className="flex items-start gap-3 text-slate-300 min-w-0">
                 <span className="text-slate-400 text-[11px] w-16 shrink-0">00:00.000</span>
                 <span className="text-slate-200">User request received</span>
               </div>
@@ -110,7 +110,7 @@ export const Hero: React.FC<HeroProps> = ({ onStartFree, onViewDemo }) => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-2 rounded bg-rose-950/30 border border-rose-900/40 text-rose-300">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-2 p-2 rounded bg-rose-950/30 border border-rose-900/40 text-rose-300">
                 <span className="text-rose-400 text-[11px] w-16 shrink-0">00:01.883</span>
                 <div className="flex items-center gap-2">
                   <span>Tool: <span className="text-rose-200 font-bold">process_refund</span></span>
