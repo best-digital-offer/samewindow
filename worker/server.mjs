@@ -133,8 +133,31 @@ app.post("/lens-search",async(req,res)=>{
         elapsedMs:Date.now()-started
       });
     }
-    const offers=extractOffers(data);
-    return res.json({success:true,resultsUrl:data.url,productName:cleanText(data.title).replace(/Google Lens/gi,"").trim(),offers,count:offers.length,elapsedMs:Date.now()-started});
+    const lensOffers=extractOffers(data);
+    let productName=deriveProductQuery(data);
+    let offers=lensOffers;
+    let comparisonUrl="";
+    if(productName){
+      try{
+        const comparison=await searchProductOffers(context,productName);
+        if(!comparison.blocked && comparison.offers.length){
+          offers=comparison.offers;
+          comparisonUrl=comparison.url||"";
+        }
+      }catch{}
+    }
+    if(!offers.length && !productName){
+      productName=cleanText(data.title).replace(/Google Lens/gi,"").replace(/\s+/g," ").trim();
+    }
+    return res.json({
+      success:true,
+      resultsUrl:data.url,
+      comparisonUrl,
+      productName,
+      offers,
+      count:offers.length,
+      elapsedMs:Date.now()-started
+    });
   }catch(error){
     return res.status(500).json({success:false,message:error?.message||"Lens browser search failed",elapsedMs:Date.now()-started});
   }finally{await page?.close().catch(()=>{});}
