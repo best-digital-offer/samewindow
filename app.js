@@ -1635,9 +1635,9 @@ function setupRegionFilters() {
   if (!container) return;
 
   const regions = [
-    { id: 'all', label: '🌐 All Worldwide' },
-    { id: 'us', label: '🇺🇸 United States' },
-    { id: 'uk', label: '🇬🇧 United Kingdom' },
+    { id: 'all', label: '🌐 Worldwide' },
+    { id: 'us', label: '🇺🇸 US' },
+    { id: 'uk', label: '🇬🇧 UK' },
     { id: 'eu', label: '🇪🇺 Europe' },
     { id: 'in', label: '🇮🇳 India' },
     { id: 'ca', label: '🇨🇦 Canada' },
@@ -1665,46 +1665,25 @@ function setupRegionFilters() {
 function renderWorldwideRetailerLinks() {
   const container = document.getElementById('retailer-links-container');
   const activeQuerySpan = document.getElementById('active-search-query-display');
-  const countSpan = document.getElementById('retailers-count-badge');
+  const countSpan = document.getElementById('price-result-count');
+  const status = document.getElementById('price-feed-status');
+  const empty = document.getElementById('price-empty-state');
 
   if (activeQuerySpan) activeQuerySpan.textContent = currentActiveQuery;
   if (!container) return;
 
-  const stores = SearchProvider.generateRetailerLinks(currentActiveQuery, currentActiveRegion, currentBrand);
-
-  if (countSpan) {
-    countSpan.textContent = `${stores.length} store${stores.length === 1 ? '' : 's'}`;
-  }
-
+  // Deliberately do not invent price data. SearchProvider currently only knows
+  // retailer destinations, not live product listings or current prices.
   container.innerHTML = '';
+  if (countSpan) countSpan.textContent = '0';
+  if (status) status.textContent = 'Price feed: not connected';
+  if (empty) empty.style.display = 'block';
 
-  stores.forEach(store => {
-    const card = document.createElement('div');
-    card.className = 'retailer-card';
-    card.innerHTML = `
-      <div>
-        <div class="retailer-card-header">
-          <div class="retailer-logo-box" aria-hidden="true">
-            ${store.logo}
-          </div>
-          <div class="retailer-meta-header">
-            <div class="retailer-card-name">${escapeHtml(store.name)}</div>
-            <div class="retailer-region-tag">
-              <span>${store.flag}</span>
-              <span>${escapeHtml(store.countryName)}</span>
-            </div>
-          </div>
-        </div>
-        <div class="retailer-card-domain">${escapeHtml(store.domain)}</div>
-        <p class="retailer-card-desc">${escapeHtml(store.description)}</p>
-      </div>
-      <a href="${store.url}" target="_blank" rel="noopener noreferrer" class="btn-open-retailer" aria-label="Search on ${escapeHtml(store.name)}">
-        <span>Search ${escapeHtml(store.name)}</span>
-        <span aria-hidden="true">↗</span>
-      </a>
-    `;
-    container.appendChild(card);
-  });
+  const sortSelect = document.getElementById('price-sort-select');
+  if (sortSelect && !sortSelect.dataset.bound) {
+    sortSelect.dataset.bound = 'true';
+    sortSelect.addEventListener('change', renderWorldwideRetailerLinks);
+  }
 }
 
 function escapeHtml(str) {
