@@ -564,444 +564,101 @@ const RetailerLogos = {
 // 6. WORLDWIDE SEARCH PROVIDER ARCHITECTURE
 // ==========================================
 const SearchProvider = {
+  // Legacy retailer-link generator retained for compatibility, but PriceSnap no longer
+  // uses product-name shopping searches for the main visual-search flow.
   generateRetailerLinks(searchQuery, region = 'all', brand = '') {
-    const q = encodeURIComponent(searchQuery.trim());
-    const brandQuery = brand ? encodeURIComponent(`${brand} official store online`) : q;
-
-    const allStores = [
-      // 1. GLOBAL / WORLDWIDE & WEB
-      {
-        id: 'google_shopping',
-        name: 'Google Shopping',
-        region: 'all',
-        countryName: 'Worldwide',
-        flag: '🌐',
-        domain: 'google.com/shopping',
-        logo: RetailerLogos.google_shopping,
-        url: `https://www.google.com/search?tbm=shop&q=${q}`,
-        description: 'Multi-merchant comparison across global stores'
-      },
-      {
-        id: 'google_web_global',
-        name: 'Worldwide Web Search',
-        region: 'all',
-        countryName: 'Any Country / Site',
-        flag: '🌍',
-        domain: 'google.com',
-        logo: RetailerLogos.google_web,
-        url: `https://www.google.com/search?q=${q}+buy+online`,
-        description: 'Search online stores and shops across all countries'
-      },
-      {
-        id: 'official_brand_store',
-        name: brand ? `${brand} Official Store` : 'Official Brand Online Store',
-        region: 'all',
-        countryName: 'Brand Direct',
-        flag: '🏷️',
-        domain: brand ? `${brand.toLowerCase().replace(/[^a-z0-9]/g, '')}.com` : 'official',
-        logo: RetailerLogos.official_brand,
-        url: `https://www.google.com/search?q=${brandQuery}`,
-        description: 'Find official manufacturer store and certified sellers'
-      },
-      {
-        id: 'aliexpress',
-        name: 'AliExpress Global',
-        region: 'all',
-        countryName: 'Global Shipping (200+ Countries)',
-        flag: '🌐',
-        domain: 'aliexpress.com',
-        logo: RetailerLogos.aliexpress,
-        url: `https://www.aliexpress.com/wholesale?SearchText=${q}`,
-        description: 'Worldwide consumer products & direct marketplace'
-      },
-
-      // 2. UNITED STATES
-      {
-        id: 'amazon_us',
-        name: 'Amazon US',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'amazon.com',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.com/s?k=${q}`,
-        description: 'Amazon US marketplace catalog & Prime'
-      },
-      {
-        id: 'walmart',
-        name: 'Walmart',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'walmart.com',
-        logo: RetailerLogos.walmart,
-        url: `https://www.walmart.com/search?q=${q}`,
-        description: 'Walmart online & retail stores nationwide'
-      },
-      {
-        id: 'target',
-        name: 'Target',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'target.com',
-        logo: RetailerLogos.target,
-        url: `https://www.target.com/s?searchTerm=${q}`,
-        description: 'Target retail inventory & online orders'
-      },
-      {
-        id: 'bestbuy',
-        name: 'Best Buy',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'bestbuy.com',
-        logo: RetailerLogos.bestbuy,
-        url: `https://www.bestbuy.com/site/searchpage.jsp?st=${q}`,
-        description: 'Top US consumer tech & electronics'
-      },
-      {
-        id: 'ebay_us',
-        name: 'eBay US',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'ebay.com',
-        logo: RetailerLogos.ebay,
-        url: `https://www.ebay.com/sch/i.html?_nkw=${q}`,
-        description: 'eBay new, used & refurbished inventory'
-      },
-      {
-        id: 'bhphoto',
-        name: 'B&H Photo Video',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'bhphotovideo.com',
-        logo: RetailerLogos.bhphoto,
-        url: `https://www.bhphotovideo.com/c/search?Ntt=${q}`,
-        description: 'Professional tech, photo, audio & computer store'
-      },
-      {
-        id: 'newegg',
-        name: 'Newegg',
-        region: 'us',
-        countryName: 'United States',
-        flag: '🇺🇸',
-        domain: 'newegg.com',
-        logo: RetailerLogos.newegg,
-        url: `https://www.newegg.com/p/pl?d=${q}`,
-        description: 'Computer hardware, electronics & gaming'
-      },
-
-      // 3. UNITED KINGDOM
-      {
-        id: 'amazon_uk',
-        name: 'Amazon UK',
-        region: 'uk',
-        countryName: 'United Kingdom',
-        flag: '🇬🇧',
-        domain: 'amazon.co.uk',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.co.uk/s?k=${q}`,
-        description: 'Amazon UK store with fast delivery'
-      },
-      {
-        id: 'currys',
-        name: 'Currys UK',
-        region: 'uk',
-        countryName: 'United Kingdom',
-        flag: '🇬🇧',
-        domain: 'currys.co.uk',
-        logo: RetailerLogos.currys,
-        url: `https://www.currys.co.uk/search?q=${q}`,
-        description: 'Major UK electrical & technology retailer'
-      },
-      {
-        id: 'argos',
-        name: 'Argos UK',
-        region: 'uk',
-        countryName: 'United Kingdom',
-        flag: '🇬🇧',
-        domain: 'argos.co.uk',
-        logo: RetailerLogos.argos,
-        url: `https://www.argos.co.uk/search/${q}`,
-        description: 'UK catalogue retail & same-day collection'
-      },
-      {
-        id: 'ebay_uk',
-        name: 'eBay UK',
-        region: 'uk',
-        countryName: 'United Kingdom',
-        flag: '🇬🇧',
-        domain: 'ebay.co.uk',
-        logo: RetailerLogos.ebay,
-        url: `https://www.ebay.co.uk/sch/i.html?_nkw=${q}`,
-        description: 'eBay UK marketplace & verified sellers'
-      },
-
-      // 4. EUROPE
-      {
-        id: 'amazon_de',
-        name: 'Amazon DE (Europe)',
-        region: 'eu',
-        countryName: 'Germany / Europe',
-        flag: '🇪🇺',
-        domain: 'amazon.de',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.de/s?k=${q}`,
-        description: 'Largest European Amazon marketplace'
-      },
-      {
-        id: 'mediamarkt',
-        name: 'MediaMarkt',
-        region: 'eu',
-        countryName: 'Europe (Germany, Spain, etc.)',
-        flag: '🇪🇺',
-        domain: 'mediamarkt.de',
-        logo: RetailerLogos.mediamarkt,
-        url: `https://www.mediamarkt.de/de/search.html?query=${q}`,
-        description: 'Europe\'s largest consumer electronics retailer'
-      },
-      {
-        id: 'otto_de',
-        name: 'Otto Germany',
-        region: 'eu',
-        countryName: 'Germany',
-        flag: '🇩🇪',
-        domain: 'otto.de',
-        logo: RetailerLogos.otto,
-        url: `https://www.otto.de/suche/${q}`,
-        description: 'Leading German e-commerce platform'
-      },
-      {
-        id: 'fnac_fr',
-        name: 'Fnac France',
-        region: 'eu',
-        countryName: 'France / Europe',
-        flag: '🇫🇷',
-        domain: 'fnac.com',
-        logo: RetailerLogos.fnac,
-        url: `https://www.fnac.com/SearchResult/ResultList.aspx?SCat=0&Search=${q}`,
-        description: 'Leading French retail chain for cultural & electronic goods'
-      },
-      {
-        id: 'allegro_pl',
-        name: 'Allegro Poland',
-        region: 'eu',
-        countryName: 'Poland / Central Europe',
-        flag: '🇵🇱',
-        domain: 'allegro.pl',
-        logo: RetailerLogos.allegro,
-        url: `https://www.allegro.pl/listing?string=${q}`,
-        description: 'Top European e-commerce marketplace in Poland'
-      },
-
-      // 5. INDIA
-      {
-        id: 'flipkart',
-        name: 'Flipkart',
-        region: 'in',
-        countryName: 'India',
-        flag: '🇮🇳',
-        domain: 'flipkart.com',
-        logo: RetailerLogos.flipkart,
-        url: `https://www.flipkart.com/search?q=${q}`,
-        description: 'India\'s leading online shopping destination'
-      },
-      {
-        id: 'amazon_in',
-        name: 'Amazon India',
-        region: 'in',
-        countryName: 'India',
-        flag: '🇮🇳',
-        domain: 'amazon.in',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.in/s?k=${q}`,
-        description: 'Amazon India store with Prime delivery'
-      },
-      {
-        id: 'croma_in',
-        name: 'Croma Electronics',
-        region: 'in',
-        countryName: 'India',
-        flag: '🇮🇳',
-        domain: 'croma.com',
-        logo: RetailerLogos.croma,
-        url: `https://www.croma.com/searchB?q=${q}`,
-        description: 'Tata-backed nationwide electronics retailer'
-      },
-      {
-        id: 'reliance_digital',
-        name: 'Reliance Digital',
-        region: 'in',
-        countryName: 'India',
-        flag: '🇮🇳',
-        domain: 'reliancedigital.in',
-        logo: RetailerLogos.reliancedigital,
-        url: `https://www.reliancedigital.in/search?q=${q}`,
-        description: 'Reliance Retail electronics & tech store'
-      },
-
-      // 6. CANADA
-      {
-        id: 'amazon_ca',
-        name: 'Amazon Canada',
-        region: 'ca',
-        countryName: 'Canada',
-        flag: '🇨🇦',
-        domain: 'amazon.ca',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.ca/s?k=${q}`,
-        description: 'Amazon Canada marketplace'
-      },
-      {
-        id: 'bestbuy_ca',
-        name: 'Best Buy Canada',
-        region: 'ca',
-        countryName: 'Canada',
-        flag: '🇨🇦',
-        domain: 'bestbuy.ca',
-        logo: RetailerLogos.bestbuy,
-        url: `https://www.bestbuy.ca/en-ca/search?search=${q}`,
-        description: 'Consumer electronics & tech across Canada'
-      },
-      {
-        id: 'canadian_tire',
-        name: 'Canadian Tire',
-        region: 'ca',
-        countryName: 'Canada',
-        flag: '🇨🇦',
-        domain: 'canadiantire.ca',
-        logo: RetailerLogos.canadiantire,
-        url: `https://www.canadiantire.ca/en/search-results.html?q=${q}`,
-        description: 'Canadian automotive, home, outdoor & sports retail'
-      },
-
-      // 7. AUSTRALIA
-      {
-        id: 'amazon_au',
-        name: 'Amazon Australia',
-        region: 'au',
-        countryName: 'Australia',
-        flag: '🇦🇺',
-        domain: 'amazon.com.au',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.com.au/s?k=${q}`,
-        description: 'Amazon Australia shopping & Prime'
-      },
-      {
-        id: 'jbhifi',
-        name: 'JB Hi-Fi Australia',
-        region: 'au',
-        countryName: 'Australia & New Zealand',
-        flag: '🇦🇺',
-        domain: 'jbhifi.com.au',
-        logo: RetailerLogos.jbhifi,
-        url: `https://www.jbhifi.com.au/search?query=${q}`,
-        description: 'Australia\'s premier home entertainment & electronics store'
-      },
-      {
-        id: 'ebay_au',
-        name: 'eBay Australia',
-        region: 'au',
-        countryName: 'Australia',
-        flag: '🇦🇺',
-        domain: 'ebay.com.au',
-        logo: RetailerLogos.ebay,
-        url: `https://www.ebay.com.au/sch/i.html?_nkw=${q}`,
-        description: 'eBay Australia marketplace'
-      },
-
-      // 8. JAPAN
-      {
-        id: 'amazon_jp',
-        name: 'Amazon Japan',
-        region: 'jp',
-        countryName: 'Japan',
-        flag: '🇯🇵',
-        domain: 'amazon.co.jp',
-        logo: RetailerLogos.amazon,
-        url: `https://www.amazon.co.jp/s?k=${q}`,
-        description: 'Amazon Japan marketplace catalog'
-      },
-      {
-        id: 'rakuten_jp',
-        name: 'Rakuten Japan',
-        region: 'jp',
-        countryName: 'Japan',
-        flag: '🇯🇵',
-        domain: 'rakuten.co.jp',
-        logo: RetailerLogos.rakuten,
-        url: `https://search.rakuten.co.jp/search/mall/${q}/`,
-        description: 'Japan\'s largest e-commerce shopping mall'
-      },
-
-      // 9. ASIA & LATIN AMERICA
-      {
-        id: 'shopee',
-        name: 'Shopee',
-        region: 'asia',
-        countryName: 'Southeast Asia / LatAm',
-        flag: '🌏',
-        domain: 'shopee.com',
-        logo: RetailerLogos.shopee,
-        url: `https://shopee.com/search?keyword=${q}`,
-        description: 'Leading mobile e-commerce platform in SE Asia'
-      },
-      {
-        id: 'lazada',
-        name: 'Lazada',
-        region: 'asia',
-        countryName: 'Southeast Asia',
-        flag: '🌏',
-        domain: 'lazada.com',
-        logo: RetailerLogos.lazada,
-        url: `https://www.lazada.com/catalog/?q=${q}`,
-        description: 'Major online shopping mall in Southeast Asia'
-      },
-      {
-        id: 'mercadolibre',
-        name: 'Mercado Libre',
-        region: 'asia',
-        countryName: 'Latin America (Brazil, Mexico, etc.)',
-        flag: '🌎',
-        domain: 'mercadolibre.com',
-        logo: RetailerLogos.mercadolibre,
-        url: `https://www.mercadolibre.com/jm/search?as_word=${q}`,
-        description: 'Latin America\'s largest online commerce ecosystem'
-      }
-    ];
-
-    if (region === 'all') {
-      return allStores;
-    }
-
-    return allStores.filter(store => store.region === region || store.region === 'all');
+    const q = encodeURIComponent(String(searchQuery || '').trim());
+    return [{
+      id: 'google_shopping',
+      name: 'Google Shopping',
+      region,
+      countryName: 'Google',
+      flag: '🌐',
+      domain: 'google.com',
+      logo: RetailerLogos.google_shopping,
+      url: `https://www.google.com/search?tbm=shop&q=${q}`,
+      description: 'Fallback shopping search'
+    }];
   },
 
   PRICE_API_URL: 'https://luwsrfsojcczzrpmummy.supabase.co/functions/v1/pricesnap-search',
 
-  async searchProducts(query, region = 'all', queries = [], imageDataUrl = '') {
+  async searchProducts(query, region = 'all', queries = [], imageDataUrl = '', merchantUrls = []) {
     const response = await fetch(this.PRICE_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query,
+        query: '',
         region,
-        image_data_url: imageDataUrl
+        image_data_url: '',
+        merchant_urls: Array.isArray(merchantUrls) ? merchantUrls : []
       })
     });
+
     let data;
-    try { data = await response.json(); } catch (e) { throw new Error('Price service returned an invalid response.'); }
+    try { data = await response.json(); }
+    catch (e) { throw new Error('Price service returned an invalid response.'); }
+
     if (!response.ok || !data.ok) {
-      const error = new Error(data?.message || 'Live shopping search failed.');
+      const error = new Error(data?.message || 'Live price extraction failed.');
       error.code = data?.code || 'SEARCH_FAILED';
       throw error;
     }
-    return { liveProviderConnected: true, providerName: data.provider || 'Live Shopping Provider', results: Array.isArray(data.results) ? data.results : [], count: Number(data.count || 0) };
+
+    return {
+      liveProviderConnected: true,
+      providerName: data.provider || 'Direct Merchant Price Extractor',
+      results: Array.isArray(data.results) ? data.results : [],
+      count: Number(data.count || 0)
+    };
   }
 };
+
+// ==========================================
+// GOOGLE LENS USER-BROWSER HANDOFF
+// ==========================================
+async function openGoogleLensWithUploadedImage() {
+  const dataUrl = PriceSnapStorage.getImage();
+  if (!dataUrl) throw new Error('No uploaded image is available.');
+
+  // Google Lens supports browser-side image upload. We intentionally submit the
+  // image as a top-level navigation instead of fetch(), because this is a
+  // cross-origin upload and normal fetch() is blocked by CORS.
+  const bytes = Uint8Array.from(atob(dataUrl.split(',')[1]), c => c.charCodeAt(0));
+  const file = new File([bytes], PriceSnapStorage.getFilename() || 'pricesnap.jpg', { type: 'image/jpeg' });
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.name = 'encoded_image';
+
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  input.files = dt.files;
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://lens.google.com/v3/upload?ep=ccm&s=' + Date.now();
+  form.enctype = 'multipart/form-data';
+  form.target = '_blank';
+  form.style.display = 'none';
+
+  const dimensions = document.createElement('input');
+  dimensions.type = 'hidden';
+  dimensions.name = 'processed_image_dimensions';
+  dimensions.value = '1024,1024';
+
+  form.appendChild(input);
+  form.appendChild(dimensions);
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+
+  UI.showToast('Google Lens opened in a new tab. Copy the product/merchant links from Lens and paste them into PriceSnap.', 7000);
+}
+
+function extractUrlsFromText(text) {
+  const matches = String(text || '').match(/https?:\\/\\/[^\\s<>"'\\)\\]]+/g) || [];
+  return [...new Set(matches.map(url => url.replace(/[.,;:]+$/, '')))].slice(0, 30);
+}
 
 // ==========================================
 // 7. SAMPLE CATALOG (For Instant Testing)
@@ -1702,39 +1359,69 @@ async function renderWorldwideRetailerLinks() {
   const status = document.getElementById('price-feed-status');
   const empty = document.getElementById('price-empty-state');
   const sortSelect = document.getElementById('price-sort-select');
+  const urlsInput = document.getElementById('lens-result-urls');
 
-  if (activeQuerySpan) activeQuerySpan.textContent = 'Uploaded product image';
+  if (activeQuerySpan) activeQuerySpan.textContent = 'Google Lens results';
   if (!container) return;
+
   if (sortSelect && !sortSelect.dataset.bound) {
     sortSelect.dataset.bound = 'true';
     sortSelect.addEventListener('change', () => renderPriceOfferRows(currentPriceOffers));
   }
+
   const requestId = ++priceSearchRequestId;
-  container.innerHTML = '<div class="price-loading-state">Searching live shopping offers across merchants…</div>';
+  container.innerHTML = '<div class="price-loading-state">Ready to extract real prices from merchant pages.</div>';
   if (empty) empty.style.display = 'none';
   if (countSpan) countSpan.textContent = '0';
-  if (status) status.textContent = 'Price feed: searching…';
-  try {
-    const imageDataUrl = PriceSnapStorage.getImage() || '';
-    if (!imageDataUrl) throw new Error('No uploaded image is available for visual search.');
-    const response = await SearchProvider.searchProducts(currentActiveQuery, currentActiveRegion, [], imageDataUrl);
-    if (requestId !== priceSearchRequestId) return;
-    currentPriceOffers = Array.isArray(response.results) ? response.results : [];
-    if (status) status.textContent = currentPriceOffers.length ? 'Price feed: live · ' + response.providerName : 'Price feed: live · no priced offers found';
-    if (countSpan) countSpan.textContent = String(currentPriceOffers.length);
-    renderPriceOfferRows(currentPriceOffers);
-  } catch (error) {
-    if (requestId !== priceSearchRequestId) return;
-    currentPriceOffers = [];
-    container.innerHTML = '';
-    if (status) status.textContent = error.code === 'MISSING_PROVIDER_KEY' ? 'Price feed: provider key required' : 'Price feed: search error';
-    if (empty) {
-      empty.style.display = 'block';
-      empty.innerHTML = '<div class="price-empty-icon">₹</div>' +
-        '<h3>' + (error.code === 'MISSING_PROVIDER_KEY' ? 'Shopping provider is not configured yet' : 'Could not load live prices') + '</h3>' +
-        '<p>' + escapeHtml(error.message || 'The live shopping provider could not return offers. No prices were generated by AI.') + '</p>' +
-        '<div class="price-rules"><span>✓ Real prices only</span><span>✓ Major + independent stores</span><span>✓ Shopify merchants when indexed</span><span>✓ No AI-generated prices</span></div>';
-    }
+  if (status) status.textContent = 'Price feed: waiting for Lens links';
+
+  const extractBtn = document.getElementById('extract-lens-prices-btn');
+  if (extractBtn && !extractBtn.dataset.bound) {
+    extractBtn.dataset.bound = 'true';
+    extractBtn.addEventListener('click', async () => {
+      const urls = extractUrlsFromText(urlsInput?.value || '');
+      if (!urls.length) {
+        UI.showToast('Paste one or more Google Lens product/merchant URLs first.');
+        return;
+      }
+
+      extractBtn.disabled = true;
+      extractBtn.textContent = 'Extracting prices…';
+      if (status) status.textContent = 'Price feed: reading merchant pages';
+      if (container) container.innerHTML = '<div class="price-loading-state">Reading real product pages and extracting structured prices…</div>';
+      if (empty) empty.style.display = 'none';
+
+      try {
+        const response = await SearchProvider.searchProducts('', currentActiveRegion, [], '', urls);
+        if (requestId !== priceSearchRequestId) return;
+        currentPriceOffers = Array.isArray(response.results) ? response.results : [];
+        if (status) status.textContent = currentPriceOffers.length
+          ? 'Price feed: live · direct merchant pages'
+          : 'Price feed: no structured/visible prices found';
+        if (countSpan) countSpan.textContent = String(currentPriceOffers.length);
+        renderPriceOfferRows(currentPriceOffers);
+        if (!currentPriceOffers.length && empty) {
+          empty.style.display = 'block';
+          empty.innerHTML = '<div class="price-empty-icon">₹</div>' +
+            '<h3>No readable prices found</h3>' +
+            '<p>The merchant pages were reached, but their prices were not exposed in standard product/price markup. Try copying a few more product links from Google Lens.</p>' +
+            '<div class="price-rules"><span>✓ No SerpApi</span><span>✓ No AI-generated prices</span><span>✓ JSON-LD / meta / visible price extraction</span></div>';
+        }
+      } catch (error) {
+        currentPriceOffers = [];
+        container.innerHTML = '';
+        if (status) status.textContent = 'Price feed: extraction error';
+        if (empty) {
+          empty.style.display = 'block';
+          empty.innerHTML = '<div class="price-empty-icon">!</div><h3>Could not extract merchant prices</h3><p>' +
+            escapeHtml(error.message || 'Merchant price extraction failed.') +
+            '</p><div class="price-rules"><span>✓ No SerpApi</span><span>✓ No AI-generated prices</span></div>';
+        }
+      } finally {
+        extractBtn.disabled = false;
+        extractBtn.textContent = 'Extract Real Prices';
+      }
+    });
   }
 }
 
