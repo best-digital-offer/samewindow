@@ -656,7 +656,7 @@ async function openGoogleLensWithUploadedImage() {
 }
 
 function extractUrlsFromText(text) {
-  const matches = String(text || '').match(/https?:\\/\\/[^\\s<>"'\\)\\]]+/g) || [];
+  const matches = String(text || '').match(/https?:\/\/[^\s<>"'\)\]]+/g) || [];
   return [...new Set(matches.map(url => url.replace(/[.,;:]+$/, '')))].slice(0, 30);
 }
 
