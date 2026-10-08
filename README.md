@@ -2,11 +2,17 @@
 
 > **Snap it. Find it. Compare it.**
 
-PriceSnap is a 100% static visual shopping search web application. It enables users to take a photo or upload a screenshot of any product, identify it using AI vision models, and launch real shopping searches across online stores in **any country on any site worldwide**, complete with authentic merchant logos.
+PriceSnap is a visual shopping search web application. It identifies products with AI vision, then searches live shopping data for real merchant offers. Results are sorted by price and can include major marketplaces, independent ecommerce stores, and Shopify-powered merchants when their products are indexed.
 
 ---
 
-## Worldwide Coverage
+## Live Price Discovery
+
+The price comparison layer uses a server-side shopping search function so provider credentials never reach the browser. It searches Google Shopping results for up to four AI-generated product queries per request, combines merchant offers, removes duplicates, and sorts real priced offers from low to high. SerpApi exposes structured shopping fields including merchant source, price, extracted price, delivery, product link and condition. citeturn0search1
+
+**Required server secret:** `SERPAPI_API_KEY` must be added to the Supabase Edge Function `pricesnap-search` before live prices can appear.
+
+
 
 PriceSnap features verified direct search integrations across top global online stores:
 
@@ -41,17 +47,17 @@ If a selected model is temporarily unavailable or returns `404` (e.g. `qwen/qwen
 ## Key Features
 
 - **Client-Side Image Processing**: Upload files via drag-and-drop, file picker, or mobile device camera (`capture="environment"`). Images are automatically resized client-side using the HTML5 Canvas API (max 1024px) for speed and minimal bandwidth.
-- **Direct Browser Groq API**: Calls `https://api.groq.com/openai/v1/chat/completions` directly from your browser. Your API key is stored exclusively in your browser's `localStorage` (`pricesnap_groq_api_key`).
-- **Zero Data Hallucination**: Distinguishes AI visual recognition from live shopping data. Retailer search links are generated with strict `encodeURIComponent` query parameters rather than fabricating false prices, stock statuses, or mock Amazon listings.
+- **AI Vision**: Supports Gemini or Groq Vision for product identification. Vision credentials remain in the browser; the shopping provider credential is server-side.
+- **Real Price Integrity**: AI never generates prices, stores, stock, ratings, or product URLs. Only shopping-provider offers containing a real numeric price, merchant and product URL are displayed.
 - **Instant Demo Mode**: Includes pre-calibrated sample products (Sony WH-1000XM5, Logitech MX Master 3S, Nike Air Max 270, Apple Watch Ultra 2) so anyone can evaluate the system without needing an API key immediately.
 - **Country & Region Filter Tabs**: Filter stores instantly by `Worldwide`, `United States`, `United Kingdom`, `Europe`, `India`, `Canada`, `Australia`, `Japan`, or `Asia & LatAm`.
-- **Fully Static & GitHub Pages Ready**: Built purely with vanilla HTML5, CSS3, and JavaScript using relative paths (`./styles.css`, `./app.js`, `./loading.html`, `./results.html`). Runs directly in any web browser without Node.js, npm, or server-side build steps.
+- **GitHub Pages Frontend + Serverless Price API**: The UI remains static and GitHub Pages compatible. Live price discovery runs through the deployed Supabase Edge Function `pricesnap-search`.
 
 ---
 
 ## How to Deploy to GitHub Pages
 
-Because PriceSnap is completely static, it requires **no build step, no npm install, and no backend server**.
+The frontend remains static and requires no build step for GitHub Pages. Live price comparison additionally requires the deployed `pricesnap-search` Edge Function and a configured `SERPAPI_API_KEY` secret.
 
 ### Option A: Automatic GitHub Actions (Recommended)
 1. Push this repository to GitHub.
