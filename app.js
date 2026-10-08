@@ -1041,7 +1041,6 @@ async function initLoadingPage() {
   const setStep = (stepIndex, title, subtitle) => {
     if (headline) headline.textContent = title;
     if (subtext) subtext.textContent = subtitle;
-
     stepItems.forEach((el, idx) => {
       if (idx < stepIndex) {
         el.classList.add('completed');
@@ -1067,48 +1066,41 @@ async function initLoadingPage() {
     return;
   }
 
-  if (previewImg) {
-    previewImg.src = imageDataUrl;
-  }
-
-  const isSample = PriceSnapStorage.isSample();
-  const existingResult = PriceSnapStorage.getResult();
+  if (previewImg) previewImg.src = imageDataUrl;
 
   try {
-    setStep(0, 'Analyzing your image...', 'Extracting visual features and inspecting packaging & logos.');
-    await new Promise(r => setTimeout(r, 600));
+    setStep(0, 'Preparing your image in the browser…', 'Your uploaded image stays in this browser.');
+    await new Promise(r => setTimeout(r, 350));
 
-    const providerName = PriceSnapConfig.getProvider() === 'gemini' ? 'Google Gemini' : 'Groq Vision';
-    setStep(1, `Identifying the product with ${providerName}...`, 'Analyzing brand, model number, colors, and design characteristics.');
+    setStep(1, 'Opening Google Lens…', 'Google Lens will perform the visual product search.');
+    await new Promise(r => setTimeout(r, 350));
 
-    let identificationResult;
-
-    if (isSample && existingResult) {
-      await new Promise(r => setTimeout(r, 700));
-      identificationResult = existingResult;
-    } else {
-      if (!PriceSnapConfig.hasActiveKey()) {
-        showApiKeyPromptModal(imageDataUrl);
-        return;
-      }
-
-      identificationResult = await AIVisionEngine.analyzeImage(imageDataUrl);
-      PriceSnapStorage.saveResult(identificationResult);
+    const existingResult = PriceSnapStorage.getResult();
+    if (!existingResult || !existingResult.product_identified) {
+      PriceSnapStorage.saveResult({
+        product_identified: false,
+        confidence: 0,
+        brand: null,
+        product_name: null,
+        full_product_name: 'Visual Product Search',
+        model_number: null,
+        category: 'Product',
+        subcategory: 'Visual Search',
+        color: 'Unknown',
+        identifiers: [],
+        visual_description: 'Google Lens is the visual search engine for this search. PriceSnap does not send the uploaded image to a visual-search API.',
+        search_queries: []
+      });
     }
 
-    setStep(2, 'Preparing search queries...', 'Synthesizing targeted keyword parameters for worldwide retailer queries.');
-    await new Promise(r => setTimeout(r, 500));
-
-    setStep(3, 'Finding worldwide shopping options...', 'Generating direct search links across online stores in all countries.');
-    await new Promise(r => setTimeout(r, 450));
-
+    setStep(2, 'Google Lens is ready…', 'Copy product or merchant links from Lens and return to PriceSnap.');
+    await new Promise(r => setTimeout(r, 300));
     window.location.href = './results.html';
   } catch (err) {
-    console.error('Identification failed:', err);
+    console.error('Lens preparation failed:', err);
     showErrorState(err.message);
   }
 }
-
 function showApiKeyPromptModal(imageDataUrl) {
   const container = document.getElementById('loading-card-content');
   if (!container) return;
@@ -1317,6 +1309,19 @@ function initResultsPage() {
   }
 
   setupRegionFilters();
+
+  const lensBtn = document.getElementById('open-google-lens-btn');
+  if (lensBtn && !lensBtn.dataset.bound) {
+    lensBtn.dataset.bound = 'true';
+    lensBtn.addEventListener('click', async () => {
+      try {
+        await openGoogleLensWithUploadedImage();
+      } catch (error) {
+        UI.showToast(error.message || 'Could not open Google Lens.');
+      }
+    });
+  }
+
   renderWorldwideRetailerLinks();
 }
 
