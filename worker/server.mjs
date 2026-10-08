@@ -28,27 +28,42 @@ function cleanText(v){return(v||"").replace(/\s+/g," ").trim();}
 function absolute(href,base){try{const u=new URL(href,base);return /^https?:$/.test(u.protocol)?u.href:null}catch{return null}}
 function unwrapGoogle(href){
   try{
-    const u=new URL(href);
-    if(u.hostname.includes("google.") && (u.pathname.includes("/url")||u.pathname.includes("/goto"))){
-      return u.searchParams.get("url")||u.searchParams.get("q")||href;
+    let current=href;
+    for(let i=0;i<3;i++){
+      const u=new URL(current);
+      if(!u.hostname.includes("google.")) return current;
+      const target=u.searchParams.get("url")||u.searchParams.get("q")||u.searchParams.get("adurl")||u.searchParams.get("u");
+      if(!target||target===current) return current;
+      current=decodeURIComponent(target);
     }
-  }catch{}
-  return href;
+    return current;
+  }catch{return href}
 }
 function extractOffers(data){
   const out=[],seen=new Set();
-  const merchants=["amazon.","walmart.","target.","ebay.","bestbuy.","etsy.","homedepot.","lowes.","macys.","nike.","adidas.","costco.","wayfair.","flipkart.","myntra.","croma.","reliancedigital.","ajio.","meesho."];
+  const merchants=[
+    "amazon.","walmart.","target.","ebay.","bestbuy.","etsy.","homedepot.","lowes.","macys.",
+    "nike.","adidas.","costco.","wayfair.","flipkart.","myntra.","croma.","reliancedigital.",
+    "ajio.","meesho.","zepto.","jiomart.","jio.com","swiggy.com","blinkit.","instamart.",
+    "oneplus.","phoneplace.","olx.","flipshope."
+  ];
   for(const item of data.links){
     let url=absolute(item.href,data.url); if(!url) continue;
     url=unwrapGoogle(url);
+    let parsed;
+    try{parsed=new URL(url)}catch{continue}
+    const host=parsed.hostname.toLowerCase();
+    if(host.includes("google.")||host.includes("googleusercontent.")||host.includes("gstatic.")) continue;
     if(seen.has(url)) continue;
     const label=cleanText(item.text);
-    const host=(()=>{try{return new URL(url).hostname.toLowerCase()}catch{return""}})();
+    if(label.length<3) continue;
     const price=(label.match(/(?:₹|\$|€|£|\bINR\b|\bUSD\b|\bEUR\b|\bGBP\b)\s?[0-9][0-9,.]*/i)||[])[0]||"";
-    const looksLikeOffer=merchants.some(m=>host.includes(m))||/buy|shop|price|\$|₹|€|£|inr|usd|eur|gbp/i.test(label+" "+host);
-    if(!looksLikeOffer||label.length<3) continue;
+    const knownMerchant=merchants.some(m=>host.includes(m));
+    const looksLikeOffer=knownMerchant || (price && /buy|shop|price|online|store|offer/i.test(label+" "+host));
+    if(!looksLikeOffer) continue;
     seen.add(url);
-    out.push({merchant:host.replace(/^www\./,""),title:label.slice(0,240),price,currency:price.startsWith("₹")?"INR":price.startsWith("$")?"USD":price.startsWith("€")?"EUR":price.startsWith("£")?"GBP":"",url});
+    const currency=/^₹/.test(price)?"INR":/^\$/.test(price)?"USD":/^€/.test(price)?"EUR":/^£/.test(price)?"GBP":/INR/i.test(price)?"INR":/USD/i.test(price)?"USD":/EUR/i.test(price)?"EUR":/GBP/i.test(price)?"GBP":"";
+    out.push({merchant:host.replace(/^www\./,""),title:label.slice(0,240),price,currency,url});
     if(out.length>=50)break;
   }
   return out;
