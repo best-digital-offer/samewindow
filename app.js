@@ -208,8 +208,23 @@ const ImageProcessor = {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Export as JPEG for high model compatibility
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          // Keep the visual-search upload below SerpApi's 500 KB Image API limit.
+          let quality = 0.78;
+          let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          let attempts = 0;
+          while (compressedDataUrl.length * 0.75 > 450 * 1024 && attempts < 5) {
+            attempts += 1;
+            quality -= 0.08;
+            if (attempts >= 3 && Math.max(width, height) > 768) {
+              const scale = 768 / Math.max(width, height);
+              width = Math.round(width * scale);
+              height = Math.round(height * scale);
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+            }
+            compressedDataUrl = canvas.toDataURL('image/jpeg', Math.max(0.45, quality));
+          }
           resolve({
             dataUrl: compressedDataUrl,
             width,
@@ -967,11 +982,15 @@ const SearchProvider = {
 
   PRICE_API_URL: 'https://luwsrfsojcczzrpmummy.supabase.co/functions/v1/pricesnap-search',
 
-  async searchProducts(query, region = 'all', queries = []) {
+  async searchProducts(query, region = 'all', queries = [], imageDataUrl = '') {
     const response = await fetch(this.PRICE_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, region, queries })
+      body: JSON.stringify({
+        query,
+        region,
+        image_data_url: imageDataUrl
+      })
     });
     let data;
     try { data = await response.json(); } catch (e) { throw new Error('Price service returned an invalid response.'); }
@@ -1684,7 +1703,7 @@ async function renderWorldwideRetailerLinks() {
   const empty = document.getElementById('price-empty-state');
   const sortSelect = document.getElementById('price-sort-select');
 
-  if (activeQuerySpan) activeQuerySpan.textContent = currentActiveQuery;
+  if (activeQuerySpan) activeQuerySpan.textContent = 'Uploaded product image';
   if (!container) return;
   if (sortSelect && !sortSelect.dataset.bound) {
     sortSelect.dataset.bound = 'true';
@@ -1696,7 +1715,9 @@ async function renderWorldwideRetailerLinks() {
   if (countSpan) countSpan.textContent = '0';
   if (status) status.textContent = 'Price feed: searching…';
   try {
-    const response = await SearchProvider.searchProducts(currentActiveQuery, currentActiveRegion, currentSearchQueries);
+    const imageDataUrl = PriceSnapStorage.getImage() || '';
+    if (!imageDataUrl) throw new Error('No uploaded image is available for visual search.');
+    const response = await SearchProvider.searchProducts(currentActiveQuery, currentActiveRegion, [], imageDataUrl);
     if (requestId !== priceSearchRequestId) return;
     currentPriceOffers = Array.isArray(response.results) ? response.results : [];
     if (status) status.textContent = currentPriceOffers.length ? 'Price feed: live · ' + response.providerName : 'Price feed: live · no priced offers found';
