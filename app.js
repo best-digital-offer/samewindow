@@ -1016,8 +1016,15 @@ function initIndexPage() {
   }
 
   if (submitBtn) {
+    // Never leave the primary action permanently disabled. If no image has
+    // been selected yet, clicking the button opens the native file picker.
+    submitBtn.disabled = false;
     submitBtn.addEventListener('click', () => {
-      if (!currentImageDataUrl) return;
+      if (!currentImageDataUrl) {
+        if (fileInput) fileInput.click();
+        else if (dropzone) dropzone.click();
+        return;
+      }
 
       try {
         PriceSnapStorage.saveSession(currentImageDataUrl, currentFileName, false);
