@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyzing Product – PriceSnap</title>
+  <meta name="description" content="Analyzing product visual features and searching shopping options." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="./index.html" class="brand-link" aria-label="PriceSnap Home">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M3 9a2 2 0 0 1 2-2h3l2-3h4l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+        </div>
+        <span>PriceSnap</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="./index.html" class="nav-link">Cancel Search</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State Presentation -->
+  <main class="loading-view">
+    <div class="loading-card" id="loading-card-content">
+      <!-- Animated Viewfinder -->
+      <div class="scanner-container">
+        <img id="scanner-image" class="scanner-image" src="" alt="Analyzing product visual characteristics" />
+        <div class="scanner-beam" aria-hidden="true"></div>
+      </div>
+
+      <!-- Progressive Headline & Description -->
+      <h1 class="loading-headline" id="loading-headline">Analyzing your image...</h1>
+      <p class="loading-subtext" id="loading-subtext">Extracting visual features and inspecting packaging &amp; logos.</p>
+
+      <!-- Step Tracker -->
+      <div class="steps-list" aria-live="polite">
+        <div class="step-item active" id="step-0">
+          <span class="step-icon">1</span>
+          <span>Analyzing your image...</span>
+        </div>
+        <div class="step-item" id="step-1">
+          <span class="step-icon">2</span>
+          <span>Identifying the product...</span>
+        </div>
+        <div class="step-item" id="step-2">
+          <span class="step-icon">3</span>
+          <span>Preparing search queries...</span>
+        </div>
+        <div class="step-item" id="step-3">
+          <span class="step-icon">4</span>
+          <span>Finding worldwide shopping options...</span>
+        </div>
+      </div>
+
+      <div>
+        <a href="./index.html" class="btn-secondary" style="font-size: 0.8125rem;">← Return to Image Upload</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-privacy-note">
+        Processing takes place using your browser's local connection to the Groq vision model. Images are not stored on PriceSnap servers.
+      </div>
+      <div>
+        <span>Static GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>

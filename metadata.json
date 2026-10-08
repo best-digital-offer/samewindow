@@ -1,0 +1,6 @@
+{
+  "name": "PriceSnap",
+  "description": "Visual shopping search engine – snap a product photo to identify it and find real shopping options across the web.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

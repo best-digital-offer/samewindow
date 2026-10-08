@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worldwide Search Results – PriceSnap</title>
+  <meta name="description" content="AI product identification and verified worldwide retailer search links across all countries." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="./index.html" class="brand-link" aria-label="PriceSnap Home">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M3 9a2 2 0 0 1 2-2h3l2-3h4l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+        </div>
+        <span>PriceSnap</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="./index.html" class="btn-secondary">
+          <span>← New Search</span>
+        </a>
+        <button type="button" class="btn-secondary" data-open-settings aria-label="Open Groq Settings">
+          <span class="key-status-dot" id="key-status-indicator" aria-hidden="true"></span>
+          <span id="key-status-text">Groq: Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="results-page">
+    <div class="container">
+      
+      <!-- Top Actions Bar -->
+      <div class="results-top-nav">
+        <div>
+          <a href="./index.html" class="nav-link" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span>← Upload a different photo</span>
+          </a>
+        </div>
+        <div style="font-size: 0.8125rem; color: var(--text-subtle);">
+          Worldwide Shopping Search · Real Catalog Links Across Any Country
+        </div>
+      </div>
+
+      <!-- Main Results Split Grid -->
+      <div class="results-grid">
+        
+        <!-- Left: Uploaded Photo Card -->
+        <aside class="image-sidebar" aria-label="Analyzed Image">
+          <div class="sidebar-title">Analyzed Image</div>
+          <div class="uploaded-view-box">
+            <img id="result-uploaded-image" src="" alt="Identified product photo" />
+          </div>
+          <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 16px;">
+            <div style="font-weight: 600; color: var(--text-main);" id="result-image-filename">product.jpg</div>
+            <div>Processed via browser Canvas &amp; Groq Vision</div>
+          </div>
+          <a href="./index.html" class="btn-secondary" style="width: 100%; justify-content: center;">
+            Snap Another Product
+          </a>
+        </aside>
+
+        <!-- Right: AI Identification & Retailer Search -->
+        <div class="results-content-column">
+          
+          <!-- AI Identification Card -->
+          <section class="ai-results-card" aria-label="AI Identification Details">
+            <div class="ai-header-row">
+              <div class="card-kicker">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <span>AI Product Identification</span>
+              </div>
+              <div id="result-confidence-badge" class="confidence-indicator high">
+                92% Match Confidence
+              </div>
+            </div>
+
+            <h1 class="product-headline" id="result-product-headline">Product Identification</h1>
+
+            <!-- Unboxed Metadata Row (Zero-Pill Discipline) -->
+            <div class="meta-row" id="result-meta-row">
+              <!-- Rendered cleanly with typographic separators -->
+            </div>
+
+            <!-- Visual Description -->
+            <div class="visual-description-box">
+              <div class="section-label">Visual Characteristics</div>
+              <p class="visual-description-text" id="result-visual-description">
+                Visual details extracted by vision model.
+              </p>
+            </div>
+
+            <!-- Generated Search Queries -->
+            <div class="search-queries-box">
+              <div class="section-label">Generated Search Queries (Click any query to switch)</div>
+              <div class="queries-list" id="result-queries-list">
+                <!-- Dynamically populated query buttons -->
+              </div>
+            </div>
+
+            <!-- Custom Query Refinement Bar -->
+            <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <input type="text" id="custom-query-input" class="form-input" style="flex: 1; min-width: 240px;" placeholder="Refine search keywords..." aria-label="Refine retailer search keywords" />
+              <button type="button" id="update-query-btn" class="btn-secondary">
+                Update Retailer Links
+              </button>
+            </div>
+          </section>
+
+          <!-- Retailer Search Section -->
+          <section class="retailer-search-section" aria-label="Worldwide Retailer Search Options">
+            <div class="ai-header-row" style="margin-bottom: 4px;">
+              <div class="card-kicker">
+                <span>Worldwide Retailer Search</span>
+              </div>
+              <div id="retailers-count-badge" style="font-size: 0.8125rem; font-weight: 600; color: var(--text-subtle);">
+                25 stores
+              </div>
+            </div>
+            
+            <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">
+              Find this product in any country on any site
+            </h2>
+
+            <!-- Distinction Banner -->
+            <div class="notice-banner">
+              <h4>Real Catalog Deep Links (Zero Fabricated Prices)</h4>
+              <p>
+                PriceSnap never invents fake prices or stock. The buttons below launch direct searches on verified online stores worldwide using the identified query:
+                <strong id="active-search-query-display" style="color: var(--text-main);"></strong>.
+              </p>
+            </div>
+
+            <!-- Region & Country Filter Bar -->
+            <div class="region-filter-wrapper">
+              <div class="region-filter-label">
+                <span>Filter by Country / Region:</span>
+                <span style="font-size: 0.75rem; color: var(--text-subtle);">Includes verified store logos</span>
+              </div>
+              <div class="region-filter-bar" id="region-filter-bar" role="tablist" aria-label="Country filter">
+                <!-- Dynamically populated region buttons -->
+              </div>
+            </div>
+
+            <!-- Retailer Cards Grid -->
+            <div class="retailer-links-grid" id="retailer-links-container">
+              <!-- Dynamically populated retailer search cards with SVG logos -->
+            </div>
+          </section>
+
+          <!-- Real Shopping Data Notice -->
+          <section style="background-color: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px;">
+            <div class="section-label" style="margin-bottom: 6px;">Worldwide Shopping Coverage &amp; Provider Notice</div>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+              Prices must never be generated by AI. On GitHub Pages static hosting, PriceSnap links you directly to official merchant indices across the United States, United Kingdom, Europe, India, Canada, Australia, Japan, and global marketplaces.
+            </p>
+            <div style="font-size: 0.75rem; color: var(--text-subtle);">
+              Status: Direct Retailer Deep-Link Mode (Active) · Price Fabrication: Strictly Prohibited
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Settings Modal (AI Vision Engine configuration) -->
+  <div class="modal-overlay" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="settings-modal-title">AI Vision Settings</h2>
+        <button type="button" class="modal-close-btn" id="close-settings-btn" aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ai-provider-select">AI Vision Provider</label>
+        <select id="ai-provider-select" class="form-input">
+          <option value="gemini" selected>Google Gemini (Recommended - Free, Fast &amp; Reliable)</option>
+          <option value="groq">Groq Vision (qwen/qwen3.8-27b)</option>
+        </select>
+      </div>
+
+      <div id="gemini-settings-group">
+        <div class="form-group">
+          <label class="form-label" for="gemini-api-key-input">Google Gemini API Key</label>
+          <div class="password-input-wrap">
+            <input type="password" id="gemini-api-key-input" class="form-input" placeholder="AIzaSy..." autocomplete="off" />
+            <button type="button" id="toggle-gemini-key-btn" class="toggle-password-btn">Show</button>
+          </div>
+          <div class="form-help">
+            Stored locally in your browser. Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Google AI Studio</a>.
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gemini-model-select">Gemini Model</label>
+          <select id="gemini-model-select" class="form-input">
+            <option value="gemini-2.5-flash" selected>gemini-2.5-flash (Fast &amp; High-Resolution Multimodal)</option>
+            <option value="gemini-flash-latest">gemini-flash-latest</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="groq-settings-group" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="groq-api-key-input">Groq API Key</label>
+          <div class="password-input-wrap">
+            <input type="password" id="groq-api-key-input" class="form-input" placeholder="gsk_..." autocomplete="off" />
+            <button type="button" id="toggle-groq-key-btn" class="toggle-password-btn">Show</button>
+          </div>
+          <div class="form-help">
+            Stored locally in your browser. Note: Groq decommissioned llama-3.2-11b-vision-preview and qwen3.6-27b.
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="groq-model-select">Groq Model</label>
+          <select id="groq-model-select" class="form-input">
+            <option value="qwen/qwen3.8-27b" selected>qwen/qwen3.8-27b (Active Multimodal)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="remove-settings-btn" style="color: var(--accent-rose-text); border-color: var(--accent-rose-subtle);">
+          Remove Key
+        </button>
+        <button type="button" class="btn-secondary" id="cancel-settings-btn">Cancel</button>
+        <button type="button" class="btn-primary" id="save-settings-btn">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-privacy-note">
+        <strong>PriceSnap</strong> is a static visual shopping search website. Your Groq API key is stored locally in your browser. Uploaded images are processed for product identification and are not permanently stored by PriceSnap.
+      </div>
+      <div>
+        <span>Worldwide Search Supported</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
