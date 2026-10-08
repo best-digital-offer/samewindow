@@ -1399,3 +1399,128 @@ select:focus-visible {
     gap: 5px;
   }
 }
+
+
+.price-loading-state {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  font-size: 0.875rem;
+}
+
+.price-offer-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: var(--bg-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.price-offer-row:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.price-rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.price-offer-main {
+  min-width: 0;
+}
+
+.price-offer-store {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+
+.price-offer-product {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price-offer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--text-subtle);
+  font-size: 0.7rem;
+}
+
+.price-offer-values {
+  min-width: 145px;
+  text-align: right;
+}
+
+.price-offer-price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.price-offer-shipping,
+.price-offer-total {
+  font-size: 0.72rem;
+  color: var(--text-subtle);
+  margin-top: 3px;
+}
+
+.price-offer-total strong {
+  color: var(--text-main);
+}
+
+.btn-open-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--text-main);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.btn-open-price:hover {
+  opacity: 0.88;
+}
+
+@media (max-width: 760px) {
+  .price-offer-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .price-offer-values {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .btn-open-price {
+    grid-column: 2;
+    width: fit-content;
+  }
+}
