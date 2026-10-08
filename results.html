@@ -28,7 +28,7 @@
         </a>
         <button type="button" class="btn-secondary" data-open-settings aria-label="Open Groq Settings">
           <span class="key-status-dot" id="key-status-indicator" aria-hidden="true"></span>
-          <span id="key-status-text">Groq: Settings</span>
+          <span id="key-status-text">Optional AI Settings</span>
         </button>
       </div>
     </div>
@@ -60,7 +60,7 @@
           </div>
           <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 16px;">
             <div style="font-weight: 600; color: var(--text-main);" id="result-image-filename">product.jpg</div>
-            <div>Processed via browser Canvas &amp; AI Vision</div>
+            <div>Image stays in your browser · Google Lens performs visual search</div>
           </div>
           <a href="./index.html" class="btn-secondary" style="width: 100%; justify-content: center;">
             Snap Another Product
@@ -71,13 +71,13 @@
         <div class="results-content-column">
           
           <!-- AI Identification Card -->
-          <section class="ai-results-card" aria-label="AI Identification Details">
+          <section class="ai-results-card" aria-label="Visual Search Details">
             <div class="ai-header-row">
               <div class="card-kicker">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
-                <span>AI Product Identification</span>
+                <span>Visual Search</span>
               </div>
               <div id="result-confidence-badge" class="confidence-indicator high">
                 92% Match Confidence
@@ -99,21 +99,6 @@
               </p>
             </div>
 
-            <!-- Generated Search Queries -->
-            <div class="search-queries-box">
-              <div class="section-label">Generated Search Queries (Click any query to switch)</div>
-              <div class="queries-list" id="result-queries-list">
-                <!-- Dynamically populated query buttons -->
-              </div>
-            </div>
-
-            <!-- Custom Query Refinement Bar -->
-            <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
-              <input type="text" id="custom-query-input" class="form-input" style="flex: 1; min-width: 240px;" placeholder="Refine search keywords..." aria-label="Refine retailer search keywords" />
-              <button type="button" id="update-query-btn" class="btn-secondary">
-                Update Retailer Links
-              </button>
-            </div>
           </section>
 
           <!-- Price Comparison Section -->
@@ -266,7 +251,7 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-privacy-note">
-        <strong>PriceSnap</strong> is a visual shopping search website. Your AI vision key is stored locally in your browser. Shopping provider credentials stay server-side and are never exposed to the browser.
+        <strong>PriceSnap</strong> is a visual shopping search website. Your uploaded image stays in your browser for the Google Lens handoff. Price extraction uses direct merchant-page data first; optional AI features can remain configured locally.
       </div>
       <div>
         <span>Worldwide Search Supported</span>
