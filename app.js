@@ -1016,23 +1016,39 @@ function initIndexPage() {
   }
 
   if (submitBtn) {
-    // Never leave the primary action permanently disabled. If no image has
-    // been selected yet, clicking the button opens the native file picker.
-    submitBtn.disabled = false;
-    submitBtn.addEventListener('click', () => {
+    const syncButtonState = () => {
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('disabled');
+      submitBtn.style.pointerEvents = 'auto';
+      submitBtn.style.opacity = '1';
+    };
+
+    syncButtonState();
+
+    submitBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
       if (!currentImageDataUrl) {
-        if (fileInput) fileInput.click();
-        else if (dropzone) dropzone.click();
+        if (fileInput) {
+          fileInput.value = '';
+          fileInput.click();
+        } else {
+          UI.showToast('Image picker is unavailable. Please use the upload area.');
+        }
         return;
       }
 
       try {
-        PriceSnapStorage.saveSession(currentImageDataUrl, currentFileName, false);
-        window.location.href = './loading.html';
+        PriceSnapStorage.saveSession(currentImageDataUrl, currentFileName || 'product-image.jpg', false);
+        UI.showToast('Image saved. Starting visual search...', 1500);
+        setTimeout(() => { window.location.href = './loading.html'; }, 150);
       } catch (err) {
-        alert(err.message);
+        console.error('[PriceSnap] Save image failed:', err);
+        UI.showToast(err.message || 'Could not save the image.');
       }
     });
+  }
   }
 }
 
