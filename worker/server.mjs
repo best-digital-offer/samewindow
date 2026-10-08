@@ -179,6 +179,15 @@ app.post("/lens-search",async(req,res)=>{
           comparisonUrl=comparison.url||"";
         }
       }catch{}
+      if(!offers.length){
+        try{
+          const fallback=await searchWebOffers(context,productName);
+          if(!fallback.blocked && fallback.offers.length){
+            offers=fallback.offers;
+            comparisonUrl=fallback.url||"";
+          }
+        }catch{}
+      }
     }
     if(!offers.length && !productName){
       productName=cleanText(data.title).replace(/Google Lens/gi,"").replace(/\s+/g," ").trim();
