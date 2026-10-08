@@ -69,6 +69,52 @@ async function serpSearch(apiKey, query, cfg) {
   return await response.json();
 }
 
+async function serpProduct(apiKey, productId, cfg) {
+  const params = new URLSearchParams({
+    engine: "google_product",
+    product_id: productId,
+    offer_view: "true",
+    gl: cfg.gl,
+    hl: cfg.hl,
+    api_key: apiKey,
+  });
+  const response = await fetch(`https://serpapi.com/search.json?${params.toString()}`);
+  if (!response.ok) return null;
+  return await response.json();
+}
+
+function normalizeStoreOffer(store, query) {
+  const price = Number.isFinite(store.extracted_price) ? store.extracted_price : null;
+  if (price === null || !store.name || !store.link) return null;
+
+  const shipping = Number.isFinite(store.shipping_extracted)
+    ? store.shipping_extracted
+    : /free/i.test(String(store.shipping || "")) ? 0 : null;
+
+  const total = Number.isFinite(store.extracted_total)
+    ? store.extracted_total
+    : shipping === null ? price : price + shipping;
+
+  return {
+    store: String(store.name),
+    product: String(store.title || query),
+    price,
+    currency: store.price ? String(store.price).replace(/[0-9\\s.,]+/g, "").trim() || null : null,
+    shipping,
+    shipping_text: store.shipping || store.details_and_offers?.find((x) => /delivery|shipping/i.test(String(x))) || null,
+    total,
+    availability: store.details_and_offers?.find((x) => /stock|available|delivery|pickup/i.test(String(x))) || null,
+    condition: store.second_hand_condition || "new",
+    url: store.link,
+    product_link: store.link,
+    thumbnail: store.logo || null,
+    rating: store.rating ?? null,
+    reviews: store.reviews ?? null,
+    query,
+    source: "Google Product via SerpApi",
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -98,14 +144,30 @@ Deno.serve(async (req) => {
 
     const responses = await Promise.all(queries.map((q) => serpSearch(apiKey, q, cfg)));
     const offers = [];
+    const productIds = new Set();
 
     for (const data of responses) {
       for (const item of (data.shopping_results || [])) {
         const offer = normalizeOffer(item, query);
         if (offer) offers.push(offer);
+        if (item.product_id) productIds.add(String(item.product_id));
       }
       for (const item of (data.inline_shopping_results || [])) {
         const offer = normalizeOffer(item, query);
+        if (offer) offers.push(offer);
+        if (item.product_id) productIds.add(String(item.product_id));
+      }
+    }
+
+    // Expand a few likely exact-product matches into their full store offer lists.
+    // This is what allows independent merchants to appear alongside major marketplaces.
+    const productDetails = await Promise.all(
+      [...productIds].slice(0, 3).map((id) => serpProduct(apiKey, id, cfg))
+    );
+
+    for (const data of productDetails) {
+      for (const store of (data?.product_results?.stores || [])) {
+        const offer = normalizeStoreOffer(store, query);
         if (offer) offers.push(offer);
       }
     }
