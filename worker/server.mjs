@@ -53,6 +53,35 @@ function extractOffers(data){
   }
   return out;
 }
+function deriveProductQuery(data){
+  const candidates=[
+    data.title,
+    ...((data.text||"").split("\n").map(cleanText).filter(Boolean).slice(0,40))
+  ];
+  const bad=/google lens|visual matches|shopping|sign in|search by image|similar/i;
+  for(const value of candidates){
+    const q=cleanText(value).replace(/Google Lens/gi,"").replace(/\s+/g," ").trim();
+    if(q.length>=5 && q.length<=180 && !bad.test(q)) return q;
+  }
+  return "";
+}
+async function searchProductOffers(context,query){
+  const page=await context.newPage();
+  try{
+    const searchUrl="https://www.google.com/search?tbm=shop&q="+encodeURIComponent(query);
+    await page.goto(searchUrl,{waitUntil:"domcontentloaded",timeout:30000}).catch(()=>{});
+    await page.waitForTimeout(2500);
+    const data=await page.evaluate(()=>({
+      url:location.href,
+      title:document.title,
+      text:(document.body?.innerText||"").slice(0,100000),
+      links:[...document.querySelectorAll("a[href]")].map(a=>({href:a.href,text:(a.innerText||a.textContent||"").trim()}))
+    }));
+    if(blocked(data.url,data.text)) return {blocked:true,url:data.url,offers:[]};
+    return {blocked:false,url:data.url,offers:extractOffers(data)};
+  }finally{await page.close().catch(()=>{});}
+}
+
 function blocked(url,text){
   return /sorry\/index|consent.google|unusual traffic|not a robot|captcha|enable javascript/i.test(url+" "+text);
 }
