@@ -48,7 +48,7 @@ function extractOffers(data){
     const looksLikeOffer=merchants.some(m=>host.includes(m))||/buy|shop|price|\$|₹|€|£|inr|usd|eur|gbp/i.test(label+" "+host);
     if(!looksLikeOffer||label.length<3) continue;
     seen.add(url);
-    out.push({merchant:host.replace(/^www\./,""),title:label.slice(0,240),price,currency:price.startsWith("₹")?"INR":price.startsWith("$")?"USD":price.startsWith("€")?"EUR":price.startsWith("£")?"GBP":"","url"});
+    out.push({merchant:host.replace(/^www\./,""),title:label.slice(0,240),price,currency:price.startsWith("₹")?"INR":price.startsWith("$")?"USD":price.startsWith("€")?"EUR":price.startsWith("£")?"GBP":"",url});
     if(out.length>=50)break;
   }
   return out;
