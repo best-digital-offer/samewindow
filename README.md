@@ -8,7 +8,7 @@ PriceSnap is a visual shopping search web application. It identifies products wi
 
 ## Live Price Discovery
 
-The price comparison layer uses a server-side shopping search function so provider credentials never reach the browser. It searches Google Shopping results for up to four AI-generated product queries per request, combines merchant offers, removes duplicates, and sorts real priced offers from low to high. SerpApi exposes structured shopping fields including merchant source, price, extracted price, delivery, product link and condition. citeturn0search1
+The price comparison layer uses a server-side shopping search function so provider credentials never reach the browser. It searches Google Shopping results for up to four AI-generated product queries per request, combines merchant offers, removes duplicates, and sorts real priced offers from low to high. SerpApi exposes structured shopping fields including merchant source, price, extracted price, delivery, product link and condition.
 
 **Required server secret:** `SERPAPI_API_KEY` must be added to the Supabase Edge Function `pricesnap-search` before live prices can appear.
 
