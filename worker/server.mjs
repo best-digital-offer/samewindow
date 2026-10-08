@@ -80,18 +80,37 @@ function deriveProductQuery(data){
   }
   return "";
 }
+async function readPage(page){
+  return await page.evaluate(()=>({
+    url:location.href,
+    title:document.title,
+    text:(document.body?.innerText||"").slice(0,120000),
+    links:[...document.querySelectorAll("a[href]")].map(a=>({
+      href:a.href,
+      text:(a.innerText||a.textContent||"").trim(),
+      aria:a.getAttribute("aria-label")||"",
+      titleAttr:a.getAttribute("title")||""
+    }))
+  }));
+}
 async function searchProductOffers(context,query){
   const page=await context.newPage();
   try{
     const searchUrl="https://www.google.com/search?tbm=shop&q="+encodeURIComponent(query);
     await page.goto(searchUrl,{waitUntil:"domcontentloaded",timeout:30000}).catch(()=>{});
+    await page.waitForTimeout(3000);
+    const data=await readPage(page);
+    if(blocked(data.url,data.text)) return {blocked:true,url:data.url,offers:[]};
+    return {blocked:false,url:data.url,offers:extractOffers(data)};
+  }finally{await page.close().catch(()=>{});}
+}
+async function searchWebOffers(context,query){
+  const page=await context.newPage();
+  try{
+    const searchUrl="https://www.google.com/search?q="+encodeURIComponent(query+" buy price India");
+    await page.goto(searchUrl,{waitUntil:"domcontentloaded",timeout:30000}).catch(()=>{});
     await page.waitForTimeout(2500);
-    const data=await page.evaluate(()=>({
-      url:location.href,
-      title:document.title,
-      text:(document.body?.innerText||"").slice(0,100000),
-      links:[...document.querySelectorAll("a[href]")].map(a=>({href:a.href,text:(a.innerText||a.textContent||"").trim()}))
-    }));
+    const data=await readPage(page);
     if(blocked(data.url,data.text)) return {blocked:true,url:data.url,offers:[]};
     return {blocked:false,url:data.url,offers:extractOffers(data)};
   }finally{await page.close().catch(()=>{});}
